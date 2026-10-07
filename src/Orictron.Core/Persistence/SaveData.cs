@@ -22,7 +22,7 @@ public sealed class SaveData
     public const int TableSize = 5;
 
     public int Version { get; set; } = CurrentVersion;
-    /// <summary>"Enhanced" (the remake) or "Original" (the Oric tape, emulated).</summary>
+    /// <summary>"Enhanced" (new graphics and sound) or "Original" (the Oric version's look and sound).</summary>
     public string Graphics { get; set; } = "Enhanced";
     public bool Sound { get; set; } = true;
     public bool Music { get; set; } = true;
@@ -49,6 +49,22 @@ public sealed class SaveData
         if (rank < 0) return -1;
         Scores.Insert(rank, entry);
         if (Scores.Count > TableSize) Scores.RemoveRange(TableSize, Scores.Count - TableSize);
+        return rank;
+    }
+
+    /// <summary>
+    /// Records a game's score, or updates the entry an unfinished game already has in the table (a
+    /// game banked when the app went to the background and then carried on). Returns the rank, or -1.
+    /// </summary>
+    public int Record(ref ScoreEntry? entry, ScoreEntry latest)
+    {
+        if (entry != null && Scores.Contains(entry))
+        {
+            if (latest.Score <= entry.Score && latest.Deck <= entry.Deck && latest.Secured == entry.Secured) return Scores.IndexOf(entry);
+            Scores.Remove(entry);
+        }
+        int rank = Insert(latest);
+        entry = rank >= 0 ? latest : null;
         return rank;
     }
 

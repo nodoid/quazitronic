@@ -108,10 +108,10 @@ footer {{ color: var(--muted); font-size: 14px; padding: 8px 0 40px; }}
 <div class="gallery"><img src="{still('03-combat', 480, True)}" alt="A droid explodes"><img src="{still('05-transfer', 480)}" alt="The transfer battle"><img src="{still('06-deep', 480, True)}" alt="Deck four"></div></section>
 
 <section id="modes"><h2>Enhanced and original</h2>
-<p>Orictron comes two ways. Choose with the <em>Graphics</em> line on the title screen (or press <kbd>G</kbd> there on a computer).</p>
+<p>Orictron comes two ways. Choose with the <em>Graphics</em> line on the title screen or in the pause menu, or press <kbd>G</kbd> on a computer - you can switch at any time, even mid-game.</p>
 <ul>
 <li><strong>Enhanced</strong> (the default) is the game remade with the same rules, droids and decks: lit, solid 3D decks with glowing pads and energisers, 3D droids with floating lids, smooth scrolling, explosions and sparks, and new sound effects and music.</li>
-<li><strong>Original</strong> is the actual Oric Atmos tape, running in a built-in emulator of the Oric computer, with its own title screen, demo, chip sound and timing.</li>
+<li><strong>Original</strong> is the same game in the Oric Atmos version's own look and sound: its eight colours, chunky pixels, red status panel and chip sound, faithfully recreated.</li>
 </ul>
 <div class="gallery"><img src="{still('01-intro', 480)}" alt="The title screen"><img class="pixel" src="{still('07-original', 480)}" alt="The original Oric version"></div></section>
 
@@ -134,7 +134,6 @@ footer {{ color: var(--muted); font-size: 14px; padding: 8px 0 40px; }}
 <li><strong>Grapple and transfer.</strong> Grappling a droid starts a battle for its body. Your side is yellow, the droid's blue. Fire pulses down the wires: when one reaches the middle, its cell turns your colour for a few seconds. Some wires are dead ends; some split to feed two cells. Hold more of the 13 cells when the clock runs out to take the droid over. A draw is a deadlock, and you fight again.</li>
 <li><strong>Hosts.</strong> A captured droid gives you its speed, armour and weapon, but its body slowly burns out. If it is destroyed you are thrown out as the influence device; if that is destroyed the game is over.</li>
 <li><strong>Points.</strong> A destroyed droid scores its value, a captured one double, and each cleared deck 500. Your five best scores are kept.</li>
-<li><strong>Original mode.</strong> Press <kbd>Space</kbd> (or tap the screen) on the Oric's title screen to start; leave it alone and the original plays a demo. To abandon a game, use the pause menu's <em>Abandon game</em>, which presses the Oric's <kbd>Esc</kbd>.</li>
 </ul></section>
 
 <section id="droids"><h2>The droids</h2><div class="table"><table><thead><tr><th>Code</th><th>Class</th><th>Weapon</th><th>Armour</th><th>Points</th></tr></thead><tbody>
@@ -145,10 +144,10 @@ footer {{ color: var(--muted); font-size: 14px; padding: 8px 0 40px; }}
 
 <section id="faq"><h2>Questions</h2>
 <h3>Tilting doesn't move the way I expect.</h3><p>The game takes the way you're holding the device when play starts, or when you resume from pause, as level. Pause and resume to re-centre it, or switch to the D-pad with <em>Controls</em> on the title screen.</p>
-<h3>How do I switch between the enhanced and original game?</h3><p>Use the <em>Graphics</em> line on the title screen. The two are separate games: the original is the real Oric tape, so a game started in one can't continue in the other.</p>
-<h3>Why does the original look and sound so different?</h3><p>It is the Oric Atmos version exactly as it was: 240 by 224 pixels, eight colours and the computer's AY sound chip, running at the Oric's own speed.</p>
+<h3>How do I switch between the enhanced and original look?</h3><p>Use the <em>Graphics</em> line on the title screen or in the pause menu, or press <kbd>G</kbd> on a computer. Both looks play the same game, so you can switch at any moment and carry on.</p>
+<h3>Why does the original look and sound so different?</h3><p>It recreates the Oric Atmos version as it was: 240 by 224 pixels, eight colours, the red status panel and the computer\'s chip sound.</p>
 <h3>How do I turn off the sound or music?</h3><p>Use the <em>Sound</em> and <em>Music</em> lines on the title screen, or <em>Sound</em> in the pause menu.</p>
-<h3>Where are my scores kept?</h3><p>Only on your device, in the game's own storage. Uninstalling the game deletes them.</p>
+<h3>Where are my scores kept?</h3><p>Your five best scores are saved on your device, in the game's own storage, and are there next time you play, whichever look you use. Uninstalling the game deletes them.</p>
 <h3>Can I play with a controller?</h3><p>Yes, on Mac, Windows, iPad, iPhone and Android, with any controller the system recognises.</p></section>
 
 <section id="privacy"><h2>Privacy</h2><p><strong>Orictron collects nothing.</strong> It has no accounts, advertising, analytics or tracking, and it never connects to the internet. It doesn't collect, store, share or sell any personal information, from anyone, including children.</p>

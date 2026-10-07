@@ -21,7 +21,6 @@ public sealed class IntroScreen : Screen
     private DeckView? _demo;
     private float _time;
     private float _demoTime;
-    private static Texture2D? _oricLogo;
 
     public IntroScreen(OrictronGame game) : base(game)
     {
@@ -58,8 +57,7 @@ public sealed class IntroScreen : Screen
 
     private void Play()
     {
-        if (Game.Enhanced) Game.ChangeScreen(new PlayScreen(Game, Game.Random.Next(1, 65535)));
-        else Game.ChangeScreen(new OriginalScreen(Game));
+        Game.ChangeScreen(new PlayScreen(Game, Game.Random.Next(1, 65535)));
     }
 
     public override void Update(float dt)
@@ -117,76 +115,28 @@ public sealed class IntroScreen : Screen
 
     private int _menuCount => 4 + (Game.Enhanced ? 1 : 0) + (Game.HasTiltOption ? 1 : 0) + (Game.CanQuit ? 1 : 0);
 
+    private readonly Original.OriginalRenderer _oric = new();
+
+    /// <summary>ORIGINAL look: the Oric version's own title screen, recreated, with the menu in it.</summary>
     private void DrawOriginal(Gfx g)
     {
         float w = g.Width, h = g.Height;
-        float ox = MathF.Round((w - 240) / 2);
-        g.Pixelated();
-        // the Oric's screen: red border, blue frame, black panel with a white line round it
-        g.Rect(0, 0, w, h, Palette.OricRed);
-        g.Rect(ox + 6, 8, 228, 144 + 32, Palette.OricBlue);
-        g.Rect(ox + 26, 21, 188, 150, Palette.OricWhite);
-        g.Rect(ox + 28, 22, 184, 148, Palette.OricBlack);
-        // chain ornaments along the frame, as on the tape's own title screen
-        for (float x = ox + 40; x < ox + 200; x += 24)
+        float ox = MathF.Round((w - Original.OricScreen.Width) / 2);
+        var labels = _menu.Labels();
+        _oric.DrawTitle(labels, _menu.Selected, Game.Save.Best, ((int)(_time * 3) & 1) == 0);
+        g.Begin(null, SamplerState.PointClamp);
+        g.Rect(0, 0, w, h, new Color(12, 12, 16));
+        g.DrawOric(_oric.Screen, new RectangleF(ox, 0, Original.OricScreen.Width, Original.OricScreen.Height));
+        var areas = new System.Collections.Generic.List<RectangleF>();
+        for (int i = 0; i < labels.Count; i++)
         {
-            g.Rect(x, 11, 10, 6, Palette.OricWhite); g.Rect(x + 2, 13, 6, 2, Palette.OricBlue); g.Rect(x + 10, 13, 12, 2, Palette.OricWhite);
-            g.Rect(x, 175, 10, 6, Palette.OricWhite); g.Rect(x + 2, 177, 6, 2, Palette.OricBlue); g.Rect(x + 10, 177, 12, 2, Palette.OricWhite);
+            var (y, lh) = Original.OriginalRenderer.TitleLine(i);
+            areas.Add(new RectangleF(ox + 30, y, 180, lh));
         }
-        for (float y = 36; y < 160; y += 22)
-        {
-            g.Rect(ox + 10, y, 8, 8, Palette.OricWhite); g.Rect(ox + 12, y + 2, 4, 4, Palette.OricBlue);
-            g.Rect(ox + 222, y, 8, 8, Palette.OricWhite); g.Rect(ox + 224, y + 2, 4, 4, Palette.OricBlue);
-        }
-        _oricLogo ??= BuildOricLogo(g.Device);
-        g.Texture(_oricLogo, new RectangleF(ox + 42, 28, 156, 18), Color.White);
-        g.PixelTextCentred("ORIC ATMOS VERSION", w / 2, 52, Palette.OricCyan);
-        _menu.LineHeight = 13;
-        _menu.DrawOriginal(g, w / 2, 70, _time);
-        if (Game.Save.Best > 0) g.PixelText("HI " + Game.Save.Best.ToString("000000"), ox + 150, 196, Palette.OricWhite);
-        if (((int)(_time * 2.5f) & 1) == 0) g.PixelTextCentred("THE ORIGINAL TAPE, EMULATED", w / 2, 158, Palette.OricYellow);
-        _credits.DrawOriginal(g, h - 12, w);
+        _menu.SetAreas(areas);
+        // the credits run along the red text lines under the picture, across the whole display
+        _credits.DrawOriginal(g, 208, w);
         g.Smooth();
     }
 
-    /// <summary>The tape's logo: ORICTRON in letters three pixels wide and two high, outlined, with a dotted fill.</summary>
-    private static Texture2D BuildOricLogo(GraphicsDevice device)
-    {
-        const string text = "ORICTRON";
-        const int W = 156, H = 18;
-        var big = new bool[W, H];
-        int x = (W - 16 * text.Length) / 2 + 1;
-        foreach (char ch in text)
-        {
-            var cols = BitmapFont.Columns(ch);
-            for (int c = 0; c < 5; c++)
-                for (int r = 0; r < 7; r++)
-                    if ((cols[c] >> r & 1) != 0)
-                        for (int dx = 0; dx < 3; dx++)
-                            for (int dy = 0; dy < 2; dy++)
-                                big[x + c * 3 + dx, 2 + r * 2 + dy] = true;
-            x += 16;
-        }
-        var data = new Color[W * H];
-        for (int y = 0; y < H; y++)
-            for (int xx = 0; xx < W; xx++)
-            {
-                bool on;
-                if (big[xx, y]) on = y % 2 == 0 && xx % 2 == 0;
-                else
-                {
-                    on = false;
-                    for (int a = -1; a <= 1 && !on; a++)
-                        for (int b = -1; b <= 1; b++)
-                        {
-                            int px = xx + a, py = y + b;
-                            if (px >= 0 && py >= 0 && px < W && py < H && big[px, py]) { on = true; break; }
-                        }
-                }
-                data[y * W + xx] = on ? Palette.OricYellow : Color.Transparent;
-            }
-        var tex = new Texture2D(device, W, H);
-        tex.SetData(data);
-        return tex;
-    }
 }

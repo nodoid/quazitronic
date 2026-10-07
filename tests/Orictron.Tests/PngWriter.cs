@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
-namespace Orictron.Emulation;
+namespace Orictron.Tests;
 
-/// <summary>Minimal PNG encoder for packed RGBA pixels (tests, tools and screenshots of the emulated screen).</summary>
+/// <summary>Minimal PNG encoder for packed RGBA pixels (test screenshots).</summary>
 public static class PngWriter
 {
     public static void Write(string path, uint[] rgba, int width, int height, int scale = 1)

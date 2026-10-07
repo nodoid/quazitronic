@@ -5,7 +5,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Orictron.Emulation;
 using Orictron.Game;
 using Orictron.Screens;
 
@@ -13,7 +12,7 @@ namespace Orictron.Capture;
 
 /// <summary>
 /// Scripts the real game for store assets: a list of steps (a screen, the self-playing enhanced
-/// game, or the original tape in the emulator) held for a few seconds each, grabbing stills at
+/// game in either look) held for a few seconds each, grabbing stills at
 /// set moments or recording every frame to a lossless video with its soundtrack rendered
 /// sample-exact by the game's own mixer.
 /// </summary>
@@ -89,39 +88,23 @@ internal sealed class Director : ICaptureDirector
     private static void FastForward(PlayScreen ps, int frames, Func<Session, bool>? until, int after)
     {
         var view = ps.DeckViewer;
-        var sounds = view.Sounds;
-        view.Sounds = null;
+        var onTick = view.OnTick;
+        view.OnTick = null; // silently
         for (int i = 0; i < frames; i++) view.Step(default);
         if (until != null)
         {
             for (int i = 0; i < 25 * 60 * 20 && !until(ps.Session) && !ps.Session.Finished; i++) view.Step(default);
             for (int i = 0; i < after; i++) view.Step(default);
         }
-        view.Sounds = sounds;
+        view.OnTick = onTick;
     }
 
-    /// <summary>The original tape in the emulator, run on silently to <paramref name="seconds"/> with optional key presses.</summary>
-    private static Action<OrictronGame> Original(float seconds, Action<OricMachine>? keys = null) => g =>
+    /// <summary>The game playing itself in the ORIGINAL look (fast-forwarded like <see cref="Play"/>).</summary>
+    private static Action<OrictronGame> Original(int seed, int skipFrames = 0, Func<Session, bool>? until = null, int afterUntil = 0) => g =>
     {
+        Play(seed, skipFrames, until, afterUntil)(g);
         g.SetEnhanced(false);
-        var os = new OriginalScreen(g);
-        g.ChangeScreen(os);
-        var m = os.Machine;
-        keys?.Invoke(m);
-        if (keys == null) m.Run((long)(seconds * OricMachine.CpuHz));
-        m.Ay.Flush(m.Cycles);
     };
-
-    /// <summary>Starts a game on the tape and plays a little of it by holding keys.</summary>
-    private static void TapeGame(OricMachine m)
-    {
-        void Hold(OricKey k, float s) { m.SetKey(k, true); m.Run((long)(s * OricMachine.CpuHz)); m.SetKey(k, false); }
-        m.Run(2 * OricMachine.CpuHz);
-        Hold(OricKey.Space, 0.2f);
-        m.Run(OricMachine.CpuHz);
-        Hold(OricKey.Right, 1.2f);
-        Hold(OricKey.Down, 0.8f);
-    }
 
     // ------------------------------------------------------------------ scripts
 
@@ -138,8 +121,8 @@ internal sealed class Director : ICaptureDirector
         new("transfer", 2.5f, Play(1234, 0, s => s.View == View.Transfer, 60), new[] { new Shot(2.3f, "transfer") }),
         new("deck3", 3.0f, Play(1234, 0, s => s.DeckIndex >= 2, 40), new[] { new Shot(2.8f, "deck-3") }),
         new("end", 1.5f, Play(77, 0, s => s.View == View.End, 30), new[] { new Shot(1.3f, "end") }),
-        new("orig-title", 0.5f, Original(3), new[] { new Shot(0.4f, "original-title") }),
-        new("orig-play", 1.0f, Original(0, TapeGame), new[] { new Shot(0.9f, "original-play") }),
+        new("orig-transfer", 1.0f, Original(1234, 0, s => s.View == View.Transfer, 80), new[] { new Shot(0.9f, "original-transfer") }),
+        new("orig-play", 1.0f, Original(1234, 60), new[] { new Shot(0.9f, "original-play") }),
         new("done", 0.1f, Intro(true)),
     };
 
@@ -148,8 +131,8 @@ internal sealed class Director : ICaptureDirector
         new("intro", 1.0f, Intro(true), new[] { new Shot(0.9f, "phone-intro") }),
         new("play", 2.0f, Play(4242, 60), new[] { new Shot(1.8f, "phone-play") }),
         new("transfer", 2.5f, Play(4242, 0, s => s.View == View.Transfer, 60), new[] { new Shot(2.3f, "phone-transfer") }),
-        new("orig", 1.0f, Original(0, TapeGame), new[] { new Shot(0.9f, "phone-original") }),
-        new("pause", 0.5f, g => { Original(0, TapeGame)(g); g.Input.Force(Orictron.Input.Pad.Pause, true); }, new[] { new Shot(0.4f, "phone-pause") },
+        new("orig", 1.0f, Original(4242, 60), new[] { new Shot(0.9f, "phone-original") }),
+        new("pause", 0.5f, g => { Original(4242, 60)(g); g.Input.Force(Orictron.Input.Pad.Pause, true); }, new[] { new Shot(0.4f, "phone-pause") },
             During: (g, t) => { if (t > 0.1f) g.Input.Force(Orictron.Input.Pad.Pause, false); }),
         new("done", 0.1f, Intro(true)),
     };
@@ -173,9 +156,9 @@ internal sealed class Director : ICaptureDirector
         new("briefing", 1.0f, Play(Seed, 0, After(2700, s => s.View == View.Briefing), 14), new[] { new Shot(0.8f, "04-briefing") }),
         new("transfer", 1.0f, Play(Seed, 0, After(2700, s => s.View == View.Transfer), 95), new[] { new Shot(0.8f, "05-transfer") }),
         new("deck", 1.6f, Play(Seed, 0, After(10, s => s.DeckIndex >= 3 && Shooting(s)), 2), new[] { new Shot(1.4f, "06-deep") }),
-        new("original-play", 1.2f, Original(0, TapeGame), new[] { new Shot(1.1f, "07-original") }),
+        new("original-play", 1.2f, Original(Seed, 0, After(160, Shooting), 2), new[] { new Shot(1.1f, "07-original") }),
         new("howto", 0.8f, Instructions(2, true), new[] { new Shot(0.7f, "08-droids") }),
-        new("original-title", 0.6f, Original(2.6f), new[] { new Shot(0.5f, "original-title") }),
+        new("original-title", 0.6f, Intro(false), new[] { new Shot(0.5f, "original-title") }),
         new("captured", 1.4f, Play(Seed, 0, After(10, s => s.View == View.Captured), 10), new[] { new Shot(1.2f, "captured") }),
         new("done", 0.1f, Intro(true)),
     };
@@ -189,7 +172,7 @@ internal sealed class Director : ICaptureDirector
         return steps;
     }
 
-    /// <summary>A ~29 second app preview: title, play, a transfer battle, a later deck, and the original tape.</summary>
+    /// <summary>A ~29 second app preview: title, play, a transfer battle, a later deck, and the original look.</summary>
     private List<Step> VideoScript() => new()
     {
         new("intro", 3.2f, Intro(true)),
@@ -197,7 +180,7 @@ internal sealed class Director : ICaptureDirector
         new("transfer", 6.0f, Play(Seed, 0, After(2700, s => s.View == View.Briefing), 30)),
         new("deck", 5.0f, Play(Seed, 0, After(10, s => s.DeckIndex >= 3), 60)),
         new("original-title", 1.6f, Intro(false)),
-        new("original", 4.6f, Original(0, TapeGame)),
+        new("original", 4.6f, Original(Seed, 0, After(160, Shooting), 0)),
         new("end", 2.1f, Intro(true)),
     };
 

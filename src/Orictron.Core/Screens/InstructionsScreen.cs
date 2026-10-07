@@ -45,7 +45,7 @@ public sealed class InstructionsScreen : Screen
             "L                    ride the lift",
             "ESC                  pause / quit",
             "F11                  full screen",
-            "G (on the title)     enhanced or original",
+            "G                    enhanced or original look",
             "",
             "Gamepad: stick or D-pad moves, A fires, X grapples, Y rides the lift, START pauses.",
             "",
@@ -74,7 +74,7 @@ public sealed class InstructionsScreen : Screen
             "",
             "Points: destroy a droid for its value, capture it for double, plus 500 for each deck cleared.",
             "",
-            "ORIGINAL mode runs the real Oric Atmos tape in a built-in emulator, sound chip and all.",
+            "GRAPHICS on the title (or G, or the pause menu) switches between ENHANCED and the ORIGINAL Oric look and sound - even mid-game.",
         }),
     };
 

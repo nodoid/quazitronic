@@ -30,8 +30,8 @@ INTRO = ("A ship drifts through space, overrun by rogue droids. You are the infl
          "to make it yours, then clear all six decks.")
 
 ABOUT = ("Orictron is the Oric Atmos version of Quazatron, the 1986 ZX Spectrum classic. This app gives it to you "
-         "two ways: an ENHANCED remake with new graphics and sound, and the ORIGINAL Oric tape itself, running in "
-         "a built-in Oric Atmos emulator. Switch between them on the title screen.")
+         "two ways: ENHANCED, with new 3D graphics, sound and music, and ORIGINAL, the Oric version's own "
+         "eight-colour look and chip sound, faithfully recreated. Switch between them at any time, even mid-game.")
 
 FEATURES = [
     "Six decks of smooth-scrolling isometric ship, now in lit, solid 3D with glowing energisers, step pads and lifts",
@@ -39,7 +39,7 @@ FEATURES = [
     "The transfer battle: fire pulses down the wires and hold more cells than the droid to take it over",
     "Take over a bigger droid and you are faster, tougher and deadlier - until its body burns out",
     "New synthesised sound effects and music, with explosions, sparks and shimmering lights",
-    "The original Oric Atmos tape, emulated: its own title, demo, chip sound and timing",
+    "The original Oric look and sound, recreated: switch to it at any moment",
     "Instructions built in, and your five best scores saved",
 ]
 
@@ -55,7 +55,7 @@ CREDIT = ("Written by PFJ, based on the Oric port of the ZX Spectrum game by Hew
           "contains none of their code or graphics. No ads, no tracking, no internet connection needed.")
 
 WHATS_NEW = ("First release: the Oric Atmos Quazatron, remade with new 3D graphics, sound and music, plus the original "
-             "Oric tape running in a built-in emulator. Tilt controls on phones and tablets.")
+             "Oric version's look and sound, recreated. Tilt controls on phones and tablets.")
 
 
 def description(platform, bullet="•"):
@@ -68,7 +68,7 @@ def description(platform, bullet="•"):
 REVIEW_NOTES = """Orictron is an offline, single-player arcade game. No account, sign-in, network connection or purchase is needed; everything is available immediately. The app collects no data.
 
 HOW TO PLAY
-On the title screen choose PLAY. INSTRUCTIONS explains the game in five pages. GRAPHICS switches between ENHANCED (the new remake, the default) and ORIGINAL (the 1980s Oric Atmos version of the game, run by a built-in emulator of the Oric computer).
+On the title screen choose PLAY. INSTRUCTIONS explains the game in five pages. GRAPHICS switches between ENHANCED (new 3D graphics and sound, the default) and ORIGINAL (the look and sound of the 1980s Oric Atmos version, recreated in the app); G or the pause menu also switches, even mid-game.
 {controls}
 
 QUICK TEST (ENHANCED)
@@ -77,7 +77,7 @@ QUICK TEST (ENHANCED)
 - Stand on the round lift hatch where you started and press LIFT to go to the next deck.
 
 QUICK TEST (ORIGINAL)
-- Set GRAPHICS to ORIGINAL and choose PLAY. The Oric title screen appears; {start} to start. Left alone, the original plays a demo by itself after about 16 seconds."""
+- Set GRAPHICS to ORIGINAL and choose PLAY: the same game, drawn and played the way the Oric version looked and sounded."""
 
 REVIEW_CONTROLS = {
     "ios": "On iPhone and iPad, movement is by tilting the device: however it is held when play starts counts as level. Tip it away to go up the screen, towards you to go down, left or right to go across. FIRE, GRAB and LIFT are on-screen buttons; II pauses. The title menu's CONTROLS line switches to an on-screen D-pad if tilting is inconvenient in review.",
@@ -149,7 +149,7 @@ class Doc:
             f.write("\n".join(self.parts) + "\n")
 
 
-KEYWORDS = "quazatron,retro,oric,8-bit,droid,robot,isometric,arcade,classic,shooter,spectrum,80s,emulator"
+KEYWORDS = "quazatron,retro,oric,8-bit,droid,robot,isometric,arcade,classic,shooter,spectrum,80s,8bit"
 
 # ---------------------------------------------------------------- the four files
 
@@ -161,7 +161,7 @@ def apple(platform):
     d.field("NAME", NAME, 30)
     d.field("SUBTITLE", "The Oric Atmos Quazatron", 30)
     d.field("PROMOTIONAL TEXT", "Take over the droids, clear the decks. The 8-bit classic remade in lit 3D with new "
-            "sound and music - plus the original Oric tape, emulated.", 170)
+            "sound and music - or switch to the original Oric look at any time.", 170)
     d.field("KEYWORDS", KEYWORDS, 100)
     d.field("DESCRIPTION", description("mobile" if ios else "mac"), 4000)
     d.field("WHAT'S NEW", WHATS_NEW, 4000)
@@ -242,15 +242,14 @@ def windows():
     d.field("PRODUCT NAME", NAME, 256)
     d.field("SHORT DESCRIPTION", "The Oric Atmos Quazatron. You are the influence device aboard a ship overrun by rogue "
             "droids: shoot them, ram them, or win the transfer battle to take one over, and clear all six decks. Play the "
-            "enhanced remake in lit 3D with new sound and music, or switch to the original Oric tape, running in a built-in "
-            "emulator.", 1000)
+            "enhanced remake in lit 3D with new sound and music, or switch to the original Oric look and sound at any time.", 1000)
     d.field("DESCRIPTION", description("windows"), 10000)
     d.lines("PRODUCT FEATURES (ONE PER BOX)", [
         "The Oric Atmos Quazatron, remade in lit, solid isometric 3D",
         "52 droids in nine classes, each a 3D model with its own lid",
         "The transfer battle: win it to take over a droid's body",
         "New synthesised sound effects and music",
-        "The original Oric tape, run by a built-in Oric Atmos emulator",
+        "The original Oric look and sound, recreated, switchable mid-game",
         "Switch between enhanced and original on the title screen (G)",
         "Keyboard (as on the Oric) and Xbox controller support",
         "Resizable window or full screen; runs natively on x64 and Arm PCs",
@@ -262,8 +261,7 @@ def windows():
             "Offline single-player arcade game; no account, sign-in, network or purchase needed. On the title screen choose "
             "PLAY (Enter). Arrow keys or Q A O P move, Space fires, T grapples a droid, L rides the lift, Esc pauses, F11 "
             "toggles full screen. G on the title screen (or the GRAPHICS line) switches between the enhanced remake and "
-            "ORIGINAL, which runs the 1980s Oric Atmos version of the game in a built-in emulator of that computer (press "
-            "Space on its own title screen to start). An Xbox controller works throughout. Best scores are saved in the "
+            "ORIGINAL, the look and sound of the 1980s Oric Atmos version, recreated (also switchable mid-game with G). An Xbox controller works throughout. Best scores are saved in the "
             "app's own data folder. The package is a full-trust desktop app (see restricted capabilities).", 2000)
     d.lines("FILES TO UPLOAD", [
         "- Screenshots (8, no text on them): stores/windows/ (1920x1080); captions below",
@@ -332,7 +330,7 @@ CAPTIONS = [
     "04  Grapple a droid and prepare to engage",
     "05  The transfer battle: hold more cells to take the droid over",
     "06  Deeper decks, tougher droids",
-    "07  ORIGINAL mode: the real Oric Atmos tape, emulated",
+    "07  ORIGINAL mode: the Oric version's own look and sound",
     "08  Nine droid classes, explained in the instructions",
 ]
 

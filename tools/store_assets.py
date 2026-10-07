@@ -278,8 +278,7 @@ python3 tools/store_copy.py
 python3 tools/store_assets.py
 ```
 
-The capture runs the real game (the enhanced game under its own demo autopilot, the original tape in the
-emulator) with a fixed seed, at each device's own shape, so every frame is genuine gameplay.
+The capture runs the real game (under its own demo autopilot, in both looks) with a fixed seed, at each device's own shape, so every frame is genuine gameplay.
 
 | Folder | Contents |
 |---|---|

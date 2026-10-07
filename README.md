@@ -10,9 +10,11 @@ Hewson). This app has it two ways, switched from the title screen:
   lighting, glowing pads and energisers, 3D droids with floating lids, shadows, particle
   explosions, smooth scrolling at the display's refresh rate, a glass status panel after the
   original's three capsules, a neon transfer battle, synthesised sound effects and music.
-- **ORIGINAL**: the actual Oric tape, `orictron.tap`, running in a built-in Oric Atmos emulator
-  (6502, VIA, AY-3-8912 sound chip, ULA screen) at 1 MHz, with its own title screen, demo mode
-  and sound.
+- **ORIGINAL**: the Oric version's own look and sound, recreated natively (no emulation): its
+  decks, droid sprites, font, status panel and screens are drawn from the Oric game's graphics data
+  by a C# port of its drawing code, and its sound effects are played by a small square-wave synth.
+
+Both looks run the same game, so you can switch between them at any time, even mid-game.
 
 Phones and tablets steer by **tilting** (or an on-screen D-pad), with FIRE / GRAB / LIFT buttons.
 The title screen has the line "Written by PFJ, Based on the Oric port of the ZX Spectrum game by
@@ -27,12 +29,12 @@ Hewson", scrolling left to right.
 ## Repository layout
 
 ```
-src/Orictron.Core      Shared code: emulator, remade game, renderer, audio, screens, input, saves
+src/Orictron.Core      Shared code: the game, both renderers, audio, screens, input, saves
 src/Orictron.Desktop   Windows + macOS head (MonoGame DesktopGL)
 src/Orictron.Android   Android head (+ tilt sensor)
 src/Orictron.iOS       iOS/iPadOS head (+ CoreMotion tilt)
-tests/Orictron.Tests   xUnit: 6502, VIA, AY, TAP, emulated game, rules, transfer, decks, tilt, saves, audio, UI
-tools/                 Capture tool (store stills, videos, icon), icon/store/copy scripts, deck export, makemsix
+tests/Orictron.Tests   xUnit: rules, transfer, decks, original screen, sound, tilt, saves, audio, UI
+tools/                 Capture tool (store stills, videos, icon), icon/store/copy scripts, deck and graphics export
 build/                 Release script, macOS bundle files, Windows MSIX manifest and tiles
 art/                   Master icon (rendered by the game) and generated icon files
 docs/                  Architecture, building, releasing, playing

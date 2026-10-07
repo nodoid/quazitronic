@@ -19,7 +19,8 @@ away to go up the screen, towards you to go down, left or right to go across.
 **Transfer:** yellow (you, left) against blue (the droid, right). UP/DOWN pick a wire, FIRE sends a
 pulse; on touch screens just tap a wire. Hold more of the 13 cells when the timer ends.
 
-**Original mode** is the real Oric tape: press SPACE (or tap the screen / FIRE) on its title screen;
-ESC (pause menu > ABANDON GAME) abandons a game, as on the Oric.
+**Original or enhanced:** GRAPHICS on the title, G at any time, or the pause menu switches between the
+enhanced look and the Oric version's own look and sound - even mid-game. Best scores are kept between
+sessions whichever look you play in.
 
 Points: a droid's value when destroyed (M1 50 … X9 1000), double when captured, 500 per deck cleared.

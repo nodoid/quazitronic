@@ -12,10 +12,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <!-- The original Oric Atmos game, run as-is by the built-in emulator in ORIGINAL mode. -->
-    <EmbeddedResource Include="Assets\orictron.tap" LogicalName="Orictron.orictron.tap" />
-  </ItemGroup>
-  <ItemGroup>
     <InternalsVisibleTo Include="Orictron.Tests" />
     <InternalsVisibleTo Include="Orictron.Capture" />
   </ItemGroup>

@@ -109,6 +109,35 @@ public sealed class PersistenceTests : IDisposable
     }
 
     [Fact]
+    public void AGameBankedMidwayIsUpdatedNotDuplicated()
+    {
+        var d = new SaveData();
+        ScoreEntry? entry = null;
+        d.Record(ref entry, new ScoreEntry { Score = 300, Deck = 1 });   // app backgrounded mid-game
+        d.Record(ref entry, new ScoreEntry { Score = 900, Deck = 2 });   // carried on, then finished
+        Assert.Single(d.Scores);
+        Assert.Equal(900, d.Best);
+        Assert.Equal(2, d.Scores[0].Deck);
+    }
+
+    [Fact]
+    public void ScoresCarryOverToTheNextSession()
+    {
+        var first = new SaveStore(_dir);
+        var data = first.Load();
+        ScoreEntry? entry = null;
+        data.Record(ref entry, new ScoreEntry { Score = 2500, Deck = 3 });
+        first.Save(data);
+        var next = new SaveStore(_dir).Load();         // a later launch
+        Assert.Equal(2500, next.Best);
+        ScoreEntry? e2 = null;
+        next.Record(ref e2, new ScoreEntry { Score = 1200, Deck = 2 });
+        new SaveStore(_dir).Save(next);
+        var third = new SaveStore(_dir).Load();
+        Assert.Equal(new[] { 2500, 1200 }, third.Scores.Select(e => e.Score));
+    }
+
+    [Fact]
     public void NormalizeRepairsBadValues()
     {
         var d = new SaveData { Graphics = "Weird" };
@@ -162,24 +191,37 @@ public sealed class AudioTests
     }
 
     [Fact]
-    public void TheMixerPlaysTheEmulatedChip()
+    public void ChipVoicesFollowTheOriginalSoundCode()
     {
-        var m = new Orictron.Emulation.OricMachine(AudioEngine.Rate);
-        m.Write(0x030F, 7); m.Write(0x030C, 0xFF); m.Write(0x030C, 0xDD);
-        m.Write(0x030F, 0x3E); m.Write(0x030C, 0xFD); m.Write(0x030C, 0xDD);
-        m.Write(0x030F, 8); m.Write(0x030C, 0xFF); m.Write(0x030C, 0xDD);
-        m.Write(0x030F, 15); m.Write(0x030C, 0xFD); m.Write(0x030C, 0xDD);
-        m.Write(0x030F, 0); m.Write(0x030C, 0xFF); m.Write(0x030C, 0xDD);
-        m.Write(0x030F, 80); m.Write(0x030C, 0xFD); m.Write(0x030C, 0xDD);
-        m.Ay.RenderUntil(OricMachineTime(0.5));
-        var engine = new AudioEngine { Chip = m.Ay };
-        float peak = 0;
-        engine.OfflineSink = s => { foreach (var v in s) peak = Math.Max(peak, Math.Abs(v)); };
-        engine.Update(0.25f);
-        Assert.True(peak > 0.1f);
+        var chip = new ChipSound();
+        chip.Shot();
+        Assert.Equal((40, 12, 0, 0, 0), chip.State);
+        chip.Frame();                          // snd_update: the laser falls in pitch and fades
+        Assert.Equal((52, 11, 0, 0, 0), chip.State);
+        chip.Boom();
+        chip.Blip(60);
+        Assert.Equal(15, chip.State.BVolume);
+        Assert.Equal((60, 10), (chip.State.CPeriod, chip.State.CVolume));
+        for (int i = 0; i < 20; i++) chip.Frame();
+        Assert.Equal((0, 0, 0), (chip.State.AVolume, chip.State.BVolume, chip.State.CVolume));
     }
 
-    private static long OricMachineTime(double seconds) => (long)(seconds * Orictron.Emulation.OricMachine.CpuHz);
+    [Fact]
+    public void ChipVoicesAreAudibleAndSilentWhenOff()
+    {
+        var chip = new ChipSound();
+        var engine = new AudioEngine { Chip = chip };
+        float peak = 0;
+        engine.OfflineSink = s => { foreach (var v in s) peak = Math.Max(peak, Math.Abs(v)); };
+        chip.Boom();
+        engine.Update(0.1f);
+        Assert.True(peak > 0.05f);
+        chip.Off();
+        engine.Update(0.5f);                   // let the DC filter settle
+        peak = 0;
+        engine.Update(0.1f);
+        Assert.True(peak < 0.01f);
+    }
 }
 
 public sealed class UiTests

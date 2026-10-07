@@ -219,6 +219,23 @@ public sealed class Gfx
         Iso.DrawDynamicOnly();
     }
 
+    private Texture2D? _oricTexture;
+    private readonly uint[] _oricPixels = new uint[Original.OricScreen.Width * Original.OricScreen.Height];
+
+    /// <summary>Shows an Oric-format screen with hard pixels in <paramref name="dest"/>.</summary>
+    public void DrawOric(Original.OricScreen screen, RectangleF dest)
+    {
+        screen.Decode(_oricPixels);
+        End();
+        _oricTexture ??= new Texture2D(Device, Original.OricScreen.Width, Original.OricScreen.Height);
+        Device.Textures[0] = null;
+        _oricTexture.SetData(_oricPixels);
+        Begin(BlendState.Opaque, SamplerState.PointClamp);
+        _sb.Draw(_oricTexture, new Vector2(dest.X, dest.Y), null, Color.White, 0, Vector2.Zero,
+            new Vector2(dest.Width / Original.OricScreen.Width, dest.Height / Original.OricScreen.Height), SpriteEffects.None, 0);
+        Begin(BlendState.AlphaBlend, SamplerState.PointClamp);
+    }
+
     /// <summary>The enhanced ORICTRON logo, centred, <paramref name="height"/> virtual pixels tall.</summary>
     public void DrawLogo(float cx, float y, float height, float alpha = 1)
     {

@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Audio;
-using Orictron.Emulation;
 
 namespace Orictron.Audio;
 
 /// <summary>
-/// One streaming software mixer for everything the game plays: the emulated AY-3-8912 in ORIGINAL
-/// mode, and the synthesised effects and music of the enhanced game. It renders exactly as many
+/// One streaming software mixer for everything the game plays: ORIGINAL mode's chip-style voices,
+/// and the synthesised effects and music of the enhanced game. It renders exactly as many
 /// samples as game time has passed, so the store-video capture can record the soundtrack
 /// sample-for-sample by rendering offline instead of to the device.
 /// </summary>
@@ -40,8 +39,8 @@ public sealed class AudioEngine : IDisposable
     public bool Available { get; private set; }
     public bool Muted { get; set; }
     public float MasterVolume { get; set; } = 0.9f;
-    /// <summary>The emulated sound chip, mixed in while set (ORIGINAL mode).</summary>
-    public Ay38912? Chip { get; set; }
+    /// <summary>ORIGINAL mode's chip-style voices, mixed in while set.</summary>
+    public ChipSound? Chip { get; set; }
     public float ChipGain { get; set; } = 0.8f;
 
     /// <summary>When set, audio is rendered into this sink instead of the sound card (store-video capture).</summary>
@@ -147,12 +146,7 @@ public sealed class AudioEngine : IDisposable
         var mix = _mix.AsSpan(0, n);
         mix.Clear();
 
-        if (Chip != null)
-        {
-            Chip.MixInto(mix, ChipGain);
-            // If emulation got ahead (e.g. after a pause), don't let the backlog become latency.
-            if (Chip.Queued > Rate / 10) Chip.Drop(Chip.Queued - Rate / 20);
-        }
+        Chip?.MixInto(mix, ChipGain);
 
         for (int k = _voices.Count - 1; k >= 0; k--)
         {

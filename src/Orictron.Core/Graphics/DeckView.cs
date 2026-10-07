@@ -1,7 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Orictron.Audio;
 using Orictron.Game;
 
 namespace Orictron.Graphics;
@@ -32,7 +31,10 @@ public sealed class DeckView
     public float BottomMargin { get; set; }
     /// <summary>Virtual pixels at the top covered by the HUD.</summary>
     public float TopMargin { get; set; }
-    public Sounds? Sounds { get; set; }
+    /// <summary>Called after every simulation frame (sound, ORIGINAL mode's camera).</summary>
+    public Action<Session>? OnTick { get; set; }
+    /// <summary>Simulation frames run so far.</summary>
+    public long Ticks { get; private set; }
     /// <summary>Fraction (0..1) of the way from the last frame to the next.</summary>
     public float Alpha => _accum / Tick;
 
@@ -88,7 +90,8 @@ public sealed class DeckView
             _camSet = false;
             _particles.Beam(PlayerWorld(1), Color.White, 50);
         }
-        Sounds?.PlayCues(s.Cues);
+        Ticks++;
+        OnTick?.Invoke(s);
     }
 
     private static float Lerp(int a, int b, float t) => Math.Abs(b - a) > 24 ? b : a + (b - a) * t;

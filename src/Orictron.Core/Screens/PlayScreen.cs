@@ -4,13 +4,16 @@ using Orictron.Audio;
 using Orictron.Game;
 using Orictron.Graphics;
 using Orictron.Input;
+using Orictron.Original;
 using Orictron.Persistence;
 
 namespace Orictron.Screens;
 
 /// <summary>
-/// The enhanced game: the remade simulation on the 3D deck, a glass status panel after the
-/// original's three capsules, the transfer battle with glowing wires, and touch/tilt controls.
+/// The game, in either look. ENHANCED: the 3D deck, a glass status panel after the original's three
+/// capsules, the transfer battle with glowing wires, synthesised sound and music. ORIGINAL: the Oric
+/// version's own screen and sound, recreated. The look can be switched at any time (G, or the pause
+/// menu). Touch and tilt controls on phones and tablets.
 /// </summary>
 public sealed class PlayScreen : Screen
 {
@@ -21,17 +24,22 @@ public sealed class PlayScreen : Screen
     private readonly PauseMenu _pause;
     private readonly bool _autoplay;
     private int _rank = -2;
+    private ScoreEntry? _entry;
     private float _endTime;
     private float _time;
     private View _lastView = View.Deck;
     private int _tapWire = -1;
+    private readonly OriginalRenderer _original = new();
+    private View _soundView = View.Deck;
+    private bool _wasEnhanced;
 
     public PlayScreen(OrictronGame game, int seed, bool autoplay = false) : base(game)
     {
         _autoplay = autoplay;
         _session = new Session(seed, demo: autoplay);
-        _view = new DeckView(_session) { Sounds = game.Sounds };
-        _pause = new PauseMenu(game, Resume, Quit);
+        _view = new DeckView(_session) { OnTick = OnTick };
+        _pause = new PauseMenu(game, Resume, Quit, StyleChanged);
+        _wasEnhanced = game.Enhanced;
     }
 
     internal Session Session => _session;
@@ -42,9 +50,34 @@ public sealed class PlayScreen : Screen
     internal DeckView DeckViewer => _view;
     private bool HudOnTop => Game.IsMobile;
 
+    /// <summary>After every simulation frame: the frame's sounds, in the current look's style.</summary>
+    private void OnTick(Session s)
+    {
+        var chip = Game.Chip;
+        chip.Frame();
+        // The original silences everything when a transfer begins and on the end screen.
+        if (s.View != _soundView && s.View is View.Briefing or View.End) chip.Off();
+        _soundView = s.View;
+        if (Game.Enhanced) Game.Sounds.PlayCues(s.Cues);
+        else chip.Play(s.Cues);
+    }
+
+    private void StyleChanged()
+    {
+        Game.Chip.Off();
+        UpdateMusic();
+        _wasEnhanced = Game.Enhanced;
+    }
+
+    private void UpdateMusic()
+    {
+        if (Game.Enhanced && _session.View is View.Deck) Game.Music.Play(Song.Deck);
+        else Game.Music.Stop();
+    }
+
     public override void Enter()
     {
-        Game.Music.Play(Song.Deck);
+        UpdateMusic();
         Game.TiltActive = true;
         Game.Tilt.Reset();
         Game.TiltSensor?.Start();
@@ -57,13 +90,31 @@ public sealed class PlayScreen : Screen
 
     public override void Leave()
     {
+        Game.Chip.Off();
         Game.TiltActive = false;
         Game.TiltSensor?.Stop();
     }
 
     public override void OnDeactivated()
     {
-        if (!_autoplay && !_session.Finished) _pause.Show();
+        if (_autoplay) return;
+        // Bank the score so far: a phone may close a backgrounded app without warning.
+        // (OrictronGame writes the save file straight after this.)
+        BankScore();
+        if (!_session.Finished) _pause.Show();
+    }
+
+    /// <summary>Puts the current score in the best-scores table (or updates the entry this game already has there).</summary>
+    private void BankScore()
+    {
+        if (_autoplay || _session.Score <= 0) return;
+        Game.Save.Record(ref _entry, new ScoreEntry
+        {
+            Score = _session.Score * 10,
+            Deck = _session.DeckIndex + 1,
+            Secured = _session.Won,
+            Date = DateTime.Now.ToString("yyyy-MM-dd"),
+        });
     }
 
     private void Resume()
@@ -77,17 +128,19 @@ public sealed class PlayScreen : Screen
         Game.ChangeScreen(new IntroScreen(Game));
     }
 
+    /// <summary>The game is over (or abandoned): record its final score and write the save file now.</summary>
     private void RecordScore()
     {
         if (_autoplay || _rank != -2) return;
-        int score = _session.Score * 10;
-        _rank = Game.Save.Insert(new ScoreEntry
-        {
-            Score = score,
-            Deck = _session.DeckIndex + 1,
-            Secured = _session.Won,
-            Date = DateTime.Now.ToString("yyyy-MM-dd"),
-        });
+        _rank = _session.Score > 0
+            ? Game.Save.Record(ref _entry, new ScoreEntry
+            {
+                Score = _session.Score * 10,
+                Deck = _session.DeckIndex + 1,
+                Secured = _session.Won,
+                Date = DateTime.Now.ToString("yyyy-MM-dd"),
+            })
+            : -1;
         Game.PersistSave();
     }
 
@@ -131,6 +184,13 @@ public sealed class PlayScreen : Screen
             _pause.Show();
             return;
         }
+        // G switches the look at any time on a computer.
+        if (!_autoplay && input.Key(Microsoft.Xna.Framework.Input.Keys.G))
+        {
+            Game.SetEnhanced(!Game.Enhanced);
+            Game.Sounds.Play(Sfx.MenuMove, 0.5f);
+        }
+        if (Game.Enhanced != _wasEnhanced) StyleChanged();
         if (_session.View == Orictron.Game.View.Transfer && input.Taps.Count > 0)
             foreach (var t in input.Taps)
             {
@@ -145,8 +205,7 @@ public sealed class PlayScreen : Screen
 
         if (_session.View != _lastView)
         {
-            if (_session.View is Orictron.Game.View.Briefing) Game.Music.Stop();
-            if (_session.View is Orictron.Game.View.Deck) Game.Music.Play(Song.Deck);
+            UpdateMusic();
             _lastView = _session.View;
         }
 
@@ -173,7 +232,7 @@ public sealed class PlayScreen : Screen
         input.TouchButtons.Clear();
         if (!Game.IsMobile || (_autoplay && !ShowTouchControls)) return;
         float w = Game.VirtualWidth, h = OrictronGame.VirtualHeight;
-        input.TouchButtons.Add(new TouchButton(Pad.Pause, new RectangleF(4, HudOnTop ? HudHeight + 4 : 4, 24, 20), "II"));
+        input.TouchButtons.Add(new TouchButton(Pad.Pause, new RectangleF(4, HudOnTop && Game.Enhanced ? HudHeight + 4 : 4, 24, 20), "II"));
         if (_pause.Open) return;
         var v = _session.View;
         if (v is Orictron.Game.View.Deck or Orictron.Game.View.Transfer or Orictron.Game.View.Briefing)
@@ -195,8 +254,19 @@ public sealed class PlayScreen : Screen
     private float WireLength => Math.Min(118, CellX - 34);
     private float StepLen => WireLength / Transfer.Length;
 
+    /// <summary>Where the Oric screen sits in ORIGINAL mode (whole Oric pixels, centred).</summary>
+    private RectangleF OricRect => new(MathF.Round((Game.VirtualWidth - OricScreen.Width) / 2f), 0, OricScreen.Width, OricScreen.Height);
+
     private int WireAt(Vector2 p)
     {
+        if (!Game.Enhanced)
+        {
+            // the original's wires are 8 rows apart from row 38, on the left half of the screen
+            var r = OricRect;
+            if (p.X > r.X + 17 * 6 || p.X < r.X) return -1;
+            int w = (int)MathF.Floor((p.Y - r.Y - 34) / 8);
+            return w >= 0 && w < Transfer.Wires ? w : -1;
+        }
         if (p.X > CellX) return -1;
         for (int w = 0; w < Transfer.Wires; w++)
             if (Math.Abs(p.Y - WireY(w)) < 6.2f) return w;
@@ -207,6 +277,11 @@ public sealed class PlayScreen : Screen
 
     public override void Draw(Gfx g)
     {
+        if (!Game.Enhanced)
+        {
+            DrawOriginal(g);
+            return;
+        }
         var v = _session.View;
         if (v == Orictron.Game.View.Transfer) DrawTransfer(g);
         else
@@ -222,6 +297,20 @@ public sealed class PlayScreen : Screen
             g.TextCentred("DEMO", g.Width / 2f, HudOnTop ? HudHeight + 6 : 6, Palette.Gold * a);
         }
         _pause.Draw(g, true, _time);
+    }
+
+    /// <summary>ORIGINAL look: the Oric screen, recreated, with whole pixels.</summary>
+    private void DrawOriginal(Gfx g)
+    {
+        _original.Draw(_session, _view.Ticks);
+        g.Begin(null, Microsoft.Xna.Framework.Graphics.SamplerState.PointClamp);
+        g.Rect(0, 0, g.Width, g.Height, new Color(12, 12, 16));
+        g.DrawOric(_original.Screen, OricRect);
+        TouchUi.Draw(g, Game.Input, false);
+        if (_autoplay && ShowDemoLabel && ((int)(_time * 2) & 1) == 0)
+            g.PixelTextCentred("DEMO", g.Width / 2f, 206, Palette.OricYellow);
+        _pause.Draw(g, false, _time);
+        g.Smooth();
     }
 
     private void DrawHud(Gfx g)

@@ -24,6 +24,21 @@ public sealed class MenuList
     /// <summary>Items currently shown.</summary>
     public int Count => Shown().Count;
 
+    /// <summary>The labels currently shown (for screens that draw the menu themselves).</summary>
+    public List<string> Labels()
+    {
+        var l = new List<string>();
+        foreach (var i in Shown()) l.Add(i.Label());
+        return l;
+    }
+
+    /// <summary>Tap/hover areas when the screen draws the menu itself.</summary>
+    public void SetAreas(IEnumerable<RectangleF> areas)
+    {
+        _areas.Clear();
+        _areas.AddRange(areas);
+    }
+
     private List<Item> Shown()
     {
         var l = new List<Item>();
@@ -146,7 +161,7 @@ public sealed class CreditsScroller
 
     public void DrawOriginal(Gfx g, float y, float width)
     {
-        g.Rect(0, y - 2, width, 12, Palette.OricRed);
+        g.Rect(0, y - 8, width, 24, Palette.OricRed);
         g.PixelText(Text, MathF.Round(_x), y, Palette.OricYellow);
     }
 }
@@ -201,11 +216,11 @@ public sealed class PauseMenu
     private readonly MenuList _menu = new() { LineHeight = 14 };
     public bool Open { get; private set; }
 
-    public PauseMenu(OrictronGame game, Action resume, Action quit, Action? abandon = null)
+    public PauseMenu(OrictronGame game, Action resume, Action quit, Action? graphicsChanged = null)
     {
         _menu.Add(new MenuList.Item(() => "RESUME", () => { Open = false; resume(); }));
-        if (abandon != null)
-            _menu.Add(new MenuList.Item(() => "ABANDON GAME (ESC)", () => { Open = false; abandon(); }));
+        _menu.Add(new MenuList.Item(() => "GRAPHICS: " + (game.Enhanced ? "ENHANCED" : "ORIGINAL"),
+            Change: _ => { game.SetEnhanced(!game.Enhanced); graphicsChanged?.Invoke(); }));
         _menu.Add(new MenuList.Item(() => "SOUND: " + (game.Save.Sound ? "ON" : "OFF"), Change: _ => game.SetSound(!game.Save.Sound)));
         _menu.Add(new MenuList.Item(() => "CONTROLS: " + (game.Save.TiltControls ? "TILT" : "D-PAD"),
             Change: _ => { game.SetTiltControls(!game.Save.TiltControls); game.Tilt.Reset(); }, Visible: () => game.HasTiltOption));

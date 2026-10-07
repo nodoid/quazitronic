@@ -24,7 +24,7 @@
   <Applications>
     <Application Id="Orictron" Executable="Orictron.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements DisplayName="Orictron"
-                          Description="The Oric Atmos Quazatron: take over the droids, clear the decks. Enhanced remake plus the original tape."
+                          Description="The Oric Atmos Quazatron: take over the droids, clear the decks. Enhanced 3D, or the original Oric look."
                           BackgroundColor="transparent"
                           Square150x150Logo="Assets\Square150x150Logo.png"
                           Square44x44Logo="Assets\Square44x44Logo.png">

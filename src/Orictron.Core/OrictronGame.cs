@@ -10,8 +10,8 @@ using Orictron.Screens;
 namespace Orictron;
 
 /// <summary>
-/// Orictron: the Oric Atmos port of Hewson's Quazatron, in two forms - the ORIGINAL tape running
-/// in a built-in Oric emulator, and an ENHANCED remake with new graphics and sound.
+/// Orictron: the Oric Atmos port of Hewson's Quazatron, in two looks over one game - ORIGINAL,
+/// recreating the Oric version's screen and sound, and ENHANCED, with new graphics and sound.
 /// <para>
 /// The picture is laid out in Oric pixels: always 224 high (the Oric's screen), and 240 or wider to
 /// fill the display. It's drawn into a render target that is a whole multiple of that size, so the
@@ -94,6 +94,8 @@ public sealed class OrictronGame : Microsoft.Xna.Framework.Game
     public AudioEngine Audio { get; } = new();
     public Sounds Sounds { get; private set; } = null!;
     public Music Music { get; private set; } = null!;
+    /// <summary>ORIGINAL mode's chip-style sound voices.</summary>
+    public ChipSound Chip { get; } = new();
     public InputState Input { get; } = new();
     public SaveData Save { get; private set; } = new();
     public bool Enhanced => Save.Graphics != "Original";
@@ -121,6 +123,7 @@ public sealed class OrictronGame : Microsoft.Xna.Framework.Game
         if (Director == null) Audio.Start();
         Sounds = new Sounds(Audio);
         Music = new Music(Audio);
+        Audio.Chip = Chip;
         ApplySoundSettings();
         ChangeScreen(new IntroScreen(this));
     }
