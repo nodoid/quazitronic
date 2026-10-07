@@ -1,0 +1,10 @@
+# Copy to signing/local.properties (git-ignored) and fill in your own values.
+APPLE_TEAM_ID=XXXXXXXXXX
+APPLE_DEV_IDENTITY="Apple Development: Your Name (XXXXXXXXXX)"
+APPLE_DIST_IDENTITY="Apple Distribution: Your Name (XXXXXXXXXX)"
+MAC_INSTALLER_IDENTITY="3rd Party Mac Developer Installer: Your Name (XXXXXXXXXX)"
+WINDOWS_IDENTITY=12345publisher.Orictron
+WINDOWS_PUBLISHER=CN=00000000-0000-0000-0000-000000000000
+WINDOWS_PUBLISHER_NAME=your-publisher-name
+CONTACT_EMAIL=you@example.com
+KEY_OWNER="CN=Your Name, C=GB"

@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+# The original Oric source tree (kept outside this repo)
+oricport/
+# Release packages and generated store assets
+releases/
+stores/
+# Capture work files and signing material - never commit the keystore
+artifacts/
+signing/
+# Editors and macOS
+.vs/
+.idea/
+*.user
+*.DotSettings.user
+.DS_Store
+# makemsix binaries are built locally (build/windows/build-makemsix.sh) - they embed local paths
+tools/msix/
+# Apple/Android signing material, wherever it lands
+*.mobileprovision
+*.provisionprofile
+*.p8
+*.p12
+*.cer
+*.keystore
+*.jks

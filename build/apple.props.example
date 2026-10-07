@@ -1,0 +1,7 @@
+<Project>
+  <!-- Copy to signing/apple.props (git-ignored) with your own signing identities. -->
+  <PropertyGroup>
+    <OrictronAppleDevIdentity>Apple Development: Your Name (XXXXXXXXXX)</OrictronAppleDevIdentity>
+    <OrictronAppleDistIdentity>Apple Distribution: Your Name (XXXXXXXXXX)</OrictronAppleDistIdentity>
+  </PropertyGroup>
+</Project>

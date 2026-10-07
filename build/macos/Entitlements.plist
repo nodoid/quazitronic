@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Mac App Store requires the sandbox; saves go to the app's container. -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- The .NET runtime JIT-compiles code. -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.application-identifier</key>
+	<string>__TEAM_ID__.uk.co.allthejohnsons.orictron</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>__TEAM_ID__</string>
+</dict>
+</plist>

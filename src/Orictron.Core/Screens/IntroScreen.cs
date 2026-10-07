@@ -1,0 +1,192 @@
+using System;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Orictron.Audio;
+using Orictron.Game;
+using Orictron.Graphics;
+
+namespace Orictron.Screens;
+
+/// <summary>
+/// The title. ENHANCED look: the glowing logo over a live demo game on the 3D deck. ORIGINAL look:
+/// the Oric's blue framed screen with the outlined ORICTRON logo. Either way the menu offers PLAY,
+/// INSTRUCTIONS and the switch between the enhanced remake and the original, and the credits line
+/// scrolls left to right along the bottom.
+/// </summary>
+public sealed class IntroScreen : Screen
+{
+    private readonly MenuList _menu = new();
+    private readonly CreditsScroller _credits = new();
+    private DeckView? _demo;
+    private float _time;
+    private float _demoTime;
+    private static Texture2D? _oricLogo;
+
+    public IntroScreen(OrictronGame game) : base(game)
+    {
+        _menu.Add(new MenuList.Item(() => "PLAY", Play));
+        _menu.Add(new MenuList.Item(() => "INSTRUCTIONS", () => Game.ChangeScreen(new InstructionsScreen(Game))));
+        _menu.Add(new MenuList.Item(() => "GRAPHICS: " + (Game.Enhanced ? "ENHANCED" : "ORIGINAL"), Change: _ => ToggleStyle()));
+        _menu.Add(new MenuList.Item(() => "SOUND: " + (Game.Save.Sound ? "ON" : "OFF"), Change: _ => Game.SetSound(!Game.Save.Sound)));
+        _menu.Add(new MenuList.Item(() => "MUSIC: " + (Game.Save.Music ? "ON" : "OFF"), Change: _ => Game.SetMusic(!Game.Save.Music), Visible: () => Game.Enhanced));
+        _menu.Add(new MenuList.Item(() => "CONTROLS: " + (Game.Save.TiltControls ? "TILT" : "D-PAD"),
+            Change: _ => Game.SetTiltControls(!Game.Save.TiltControls), Visible: () => Game.HasTiltOption));
+        _menu.Add(new MenuList.Item(() => "QUIT", () => Game.Exit(), Visible: () => Game.CanQuit));
+    }
+
+    /// <summary>The last game's score and its place in the best-scores table (-1 none), shown once.</summary>
+    public int LastScoreRank { get; init; } = -2;
+    public int LastScore { get; init; }
+
+    public override void Enter()
+    {
+        UpdateMusic();
+    }
+
+    private void UpdateMusic()
+    {
+        if (Game.Enhanced) Game.Music.Play(Song.Title);
+        else Game.Music.Stop();
+    }
+
+    private void ToggleStyle()
+    {
+        Game.SetEnhanced(!Game.Enhanced);
+        UpdateMusic();
+    }
+
+    private void Play()
+    {
+        if (Game.Enhanced) Game.ChangeScreen(new PlayScreen(Game, Game.Random.Next(1, 65535)));
+        else Game.ChangeScreen(new OriginalScreen(Game));
+    }
+
+    public override void Update(float dt)
+    {
+        _time += dt;
+        _credits.Update(dt, Game.VirtualWidth);
+        if (Game.Input.Key(Keys.G)) { ToggleStyle(); Game.Sounds.Play(Sfx.MenuMove); }
+        _menu.Update(Game, dt);
+        if (Game.Enhanced)
+        {
+            _demoTime += dt;
+            // A fresh demo when the last one ends - or after three minutes, in case the autopilot gets stuck.
+            if (_demo == null || _demo.Session.Finished || _demoTime > 180)
+            {
+                _demo = new DeckView(new Session(Game.Random.Next(1, 65535), demo: true));
+                _demoTime = 0;
+            }
+            _demo.Zoom = Math.Max(1.2f, Game.VirtualWidth / 300f);
+            _demo.Update(dt, () => default);
+        }
+    }
+
+    public override void Draw(Gfx g)
+    {
+        if (Game.Enhanced) DrawEnhanced(g);
+        else DrawOriginal(g);
+    }
+
+    private void DrawEnhanced(Gfx g)
+    {
+        float w = g.Width, h = g.Height, cx = w / 2;
+        _demo?.Draw(g, 0.5f);
+        g.Begin();
+        // vignette
+        g.Gradient(0, 0, w, 60, new Color(0, 0, 0, 200), new Color(0, 0, 0, 0), 12);
+        g.Gradient(0, h - 50, w, 50, new Color(0, 0, 0, 0), new Color(0, 0, 0, 200), 12);
+
+        float logoH = 34 + 2 * MathF.Sin(_time * 1.3f);
+        g.DrawLogo(cx, 10, logoH);
+        g.TextCentred("THE ORIC ATMOS QUAZATRON", cx, 50, Palette.Ice * 0.85f, 0.85f);
+
+        var panel = new RectangleF(cx - 82, 64, 164, 6 + _menuCount * 13);
+        g.Panel(panel, Palette.Gold * 0.7f, 0.72f, 8);
+        _menu.DrawEnhanced(g, cx, 70, 150, _time);
+
+        if (Game.Save.Best > 0)
+            g.TextRight("HI " + Game.Save.Best.ToString("000000"), w - 6, 4, Palette.Sky, 0.85f);
+        if (LastScoreRank > -2 && LastScore > 0 && _time < 12)
+        {
+            string msg = LastScoreRank == 0 ? "NEW HIGH SCORE " + LastScore.ToString("000000") : "LAST SCORE " + LastScore.ToString("000000");
+            g.GlowText(msg, cx, panel.Bottom + 6, LastScoreRank == 0 ? Palette.Mint : Palette.Ice, 0.9f, 0.6f);
+        }
+        _credits.DrawEnhanced(g, h - 11, w);
+    }
+
+    private int _menuCount => 4 + (Game.Enhanced ? 1 : 0) + (Game.HasTiltOption ? 1 : 0) + (Game.CanQuit ? 1 : 0);
+
+    private void DrawOriginal(Gfx g)
+    {
+        float w = g.Width, h = g.Height;
+        float ox = MathF.Round((w - 240) / 2);
+        g.Pixelated();
+        // the Oric's screen: red border, blue frame, black panel with a white line round it
+        g.Rect(0, 0, w, h, Palette.OricRed);
+        g.Rect(ox + 6, 8, 228, 144 + 32, Palette.OricBlue);
+        g.Rect(ox + 26, 21, 188, 150, Palette.OricWhite);
+        g.Rect(ox + 28, 22, 184, 148, Palette.OricBlack);
+        // chain ornaments along the frame, as on the tape's own title screen
+        for (float x = ox + 40; x < ox + 200; x += 24)
+        {
+            g.Rect(x, 11, 10, 6, Palette.OricWhite); g.Rect(x + 2, 13, 6, 2, Palette.OricBlue); g.Rect(x + 10, 13, 12, 2, Palette.OricWhite);
+            g.Rect(x, 175, 10, 6, Palette.OricWhite); g.Rect(x + 2, 177, 6, 2, Palette.OricBlue); g.Rect(x + 10, 177, 12, 2, Palette.OricWhite);
+        }
+        for (float y = 36; y < 160; y += 22)
+        {
+            g.Rect(ox + 10, y, 8, 8, Palette.OricWhite); g.Rect(ox + 12, y + 2, 4, 4, Palette.OricBlue);
+            g.Rect(ox + 222, y, 8, 8, Palette.OricWhite); g.Rect(ox + 224, y + 2, 4, 4, Palette.OricBlue);
+        }
+        _oricLogo ??= BuildOricLogo(g.Device);
+        g.Texture(_oricLogo, new RectangleF(ox + 42, 28, 156, 18), Color.White);
+        g.PixelTextCentred("ORIC ATMOS VERSION", w / 2, 52, Palette.OricCyan);
+        _menu.LineHeight = 13;
+        _menu.DrawOriginal(g, w / 2, 70, _time);
+        if (Game.Save.Best > 0) g.PixelText("HI " + Game.Save.Best.ToString("000000"), ox + 150, 196, Palette.OricWhite);
+        if (((int)(_time * 2.5f) & 1) == 0) g.PixelTextCentred("THE ORIGINAL TAPE, EMULATED", w / 2, 158, Palette.OricYellow);
+        _credits.DrawOriginal(g, h - 12, w);
+        g.Smooth();
+    }
+
+    /// <summary>The tape's logo: ORICTRON in letters three pixels wide and two high, outlined, with a dotted fill.</summary>
+    private static Texture2D BuildOricLogo(GraphicsDevice device)
+    {
+        const string text = "ORICTRON";
+        const int W = 156, H = 18;
+        var big = new bool[W, H];
+        int x = (W - 16 * text.Length) / 2 + 1;
+        foreach (char ch in text)
+        {
+            var cols = BitmapFont.Columns(ch);
+            for (int c = 0; c < 5; c++)
+                for (int r = 0; r < 7; r++)
+                    if ((cols[c] >> r & 1) != 0)
+                        for (int dx = 0; dx < 3; dx++)
+                            for (int dy = 0; dy < 2; dy++)
+                                big[x + c * 3 + dx, 2 + r * 2 + dy] = true;
+            x += 16;
+        }
+        var data = new Color[W * H];
+        for (int y = 0; y < H; y++)
+            for (int xx = 0; xx < W; xx++)
+            {
+                bool on;
+                if (big[xx, y]) on = y % 2 == 0 && xx % 2 == 0;
+                else
+                {
+                    on = false;
+                    for (int a = -1; a <= 1 && !on; a++)
+                        for (int b = -1; b <= 1; b++)
+                        {
+                            int px = xx + a, py = y + b;
+                            if (px >= 0 && py >= 0 && px < W && py < H && big[px, py]) { on = true; break; }
+                        }
+                }
+                data[y * W + xx] = on ? Palette.OricYellow : Color.Transparent;
+            }
+        var tex = new Texture2D(device, W, H);
+        tex.SetData(data);
+        return tex;
+    }
+}

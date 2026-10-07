@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Desktop head for Windows and macOS (MonoGame DesktopGL / SDL2 + OpenGL). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Orictron.Desktop</RootNamespace>
+    <AssemblyName>Orictron</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="Exists('..\..\art\generated\windows\Orictron.ico')">..\..\art\generated\windows\Orictron.ico</ApplicationIcon>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyVersion>$(OrictronVersion).0</AssemblyVersion>
+    <FileVersion>$(OrictronVersion).$(OrictronBuildNumber)</FileVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Orictron.Core\Orictron.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="$(MonoGameVersion)" />
+  </ItemGroup>
+</Project>

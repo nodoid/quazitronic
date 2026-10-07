@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Back up the save file (high scores + settings) so it survives a reinstall or a new phone. -->
+<data-extraction-rules>
+  <cloud-backup>
+    <include domain="file" path="." />
+  </cloud-backup>
+  <device-transfer>
+    <include domain="file" path="." />
+  </device-transfer>
+</data-extraction-rules>

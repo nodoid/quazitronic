@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- Single source of truth for the release version on every platform. -->
+    <OrictronVersion>1.0.0</OrictronVersion>
+    <OrictronBuildNumber>1</OrictronBuildNumber>
+    <Version>$(OrictronVersion)</Version>
+    <Company>Paul F. Johnson</Company>
+    <Product>Orictron</Product>
+    <Copyright>© 2026 Paul F. Johnson</Copyright>
+    <MonoGameVersion>3.8.5.1</MonoGameVersion>
+  </PropertyGroup>
+  <!-- Signing identities live outside git (see build/apple.props.example). -->
+  <Import Project="$(MSBuildThisFileDirectory)signing/apple.props" Condition="Exists('$(MSBuildThisFileDirectory)signing/apple.props')" />
+</Project>

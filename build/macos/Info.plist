@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>uk.co.allthejohnsons.orictron</string>
+	<key>CFBundleName</key>
+	<string>Orictron</string>
+	<key>CFBundleDisplayName</key>
+	<string>Orictron</string>
+	<key>CFBundleExecutable</key>
+	<string>Orictron</string>
+	<key>CFBundleIconFile</key>
+	<string>Orictron</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>__VERSION__</string>
+	<key>CFBundleVersion</key>
+	<string>__BUILD__</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+	</array>
+	<key>LSMinimumSystemVersion</key>
+	<string>12.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.arcade-games</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Paul F. Johnson</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>GCSupportsControllerUserInteraction</key>
+	<true/>
+</dict>
+</plist>
