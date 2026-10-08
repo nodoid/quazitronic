@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Quazitronic.Android/Quazitronic.Android.csproj" />
+    <Project Path="src/Quazitronic.Core/Quazitronic.Core.csproj" />
+    <Project Path="src/Quazitronic.Desktop/Quazitronic.Desktop.csproj" />
+    <Project Path="src/Quazitronic.iOS/Quazitronic.iOS.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Quazitronic.Tests/Quazitronic.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Quazitronic.Capture/Quazitronic.Capture.csproj" />
+  </Folder>
+</Solution>

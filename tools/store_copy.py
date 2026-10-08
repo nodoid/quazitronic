@@ -182,7 +182,7 @@ def apple(platform):
         ]
     d.lines("FILES TO UPLOAD", files)
     d.table("ANSWERS IN THE CONSOLE", [
-        ("Bundle ID", "uk.co.allthejohnsons.orictron"),
+        ("Bundle ID", "uk.co.allthejohnsons.quazitronic"),
         ("SKU", "orictron"),
         ("Primary language", "English (U.K.)"),
         ("Category", "Games > Arcade (secondary: Games > Action)"),
@@ -217,7 +217,7 @@ def android():
         f"- App bundle: releases/Orictron-{VERSION}-android.aab (Production or a testing track)",
     ])
     d.table("ANSWERS IN THE CONSOLE", [
-        ("Package name", "uk.co.allthejohnsons.orictron"),
+        ("Package name", "uk.co.allthejohnsons.quazitronic"),
         ("App or game", "Game"),
         ("Category", "Arcade"),
         ("Tags", "Arcade, Retro, Shooter, Robots, Single player, Offline"),

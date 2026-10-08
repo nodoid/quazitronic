@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Builds every store screenshot, store-art tile and app-preview video from the footage captured by
-tools/Orictron.Capture (see stores/README.md for the capture commands).
+tools/Quazitronic.Capture (see stores/README.md for the capture commands).
 
     python3 tools/store_assets.py            ->  stores/{ios,macos,android,windows}
 
@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from store_copy import CAPTIONS  # noqa: E402
 
 # ---------------------------------------------------------------- font (from the game source)
-_src = open(os.path.join(ROOT, "src", "Orictron.Core", "Graphics", "BitmapFont.cs"), encoding="utf-8").read()
+_src = open(os.path.join(ROOT, "src", "Quazitronic.Core", "Graphics", "BitmapFont.cs"), encoding="utf-8").read()
 _block = _src[_src.index("Ascii ="):_src.index("};", _src.index("Ascii ="))]
 GLYPHS = [int(h, 16) for h in re.findall(r"0x([0-9A-F]{2})", _block)]
 assert len(GLYPHS) == 95 * 5
@@ -268,12 +268,12 @@ README = """# Store assets
 Everything here except `copy/` is generated, and the folder is git-ignored:
 
 ```bash
-dotnet build tools/Orictron.Capture -c Release
-dotnet run -c Release --no-build --project tools/Orictron.Capture -- icon artifacts/capture/icon --script icon
+dotnet build tools/Quazitronic.Capture -c Release
+dotnet run -c Release --no-build --project tools/Quazitronic.Capture -- icon artifacts/capture/icon --script icon
 for l in mac iphone ipad hd android-phone android-tablet; do
-  dotnet run -c Release --no-build --project tools/Orictron.Capture -- $l artifacts/capture/$l; done
+  dotnet run -c Release --no-build --project tools/Quazitronic.Capture -- $l artifacts/capture/$l; done
 for l in video-iphone video-ipad video-mac; do
-  dotnet run -c Release --no-build --project tools/Orictron.Capture -- $l artifacts/capture/$l --video; done
+  dotnet run -c Release --no-build --project tools/Quazitronic.Capture -- $l artifacts/capture/$l --video; done
 python3 tools/store_copy.py
 python3 tools/store_assets.py
 ```

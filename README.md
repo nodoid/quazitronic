@@ -64,17 +64,17 @@ Your five best scores are saved on the device and kept between sessions. See
 
 | | |
 |---|---|
-| Identifiers | Apple and Android `uk.co.allthejohnsons.orictron` |
+| Identifiers | Apple and Android `uk.co.allthejohnsons.quazitronic` |
 | Version | 1.0.0 (build 1), set in `Directory.Build.props` |
 
 ## Repository layout
 
 ```
-src/Orictron.Core      Shared code: the game, both renderers, audio, screens, input, saves
-src/Orictron.Desktop   Windows + macOS head (MonoGame DesktopGL)
-src/Orictron.Android   Android head (+ tilt sensor)
-src/Orictron.iOS       iOS/iPadOS head (+ CoreMotion tilt)
-tests/Orictron.Tests   xUnit: rules, transfer, decks, original screen, sound, tilt, saves, audio, UI
+src/Quazitronic.Core      Shared code: the game, both renderers, audio, screens, input, saves
+src/Quazitronic.Desktop   Windows + macOS head (MonoGame DesktopGL)
+src/Quazitronic.Android   Android head (+ tilt sensor)
+src/Quazitronic.iOS       iOS/iPadOS head (+ CoreMotion tilt)
+tests/Quazitronic.Tests   xUnit: rules, transfer, decks, original screen, sound, tilt, saves, audio, UI
 tools/                 Capture tool (store stills, videos, icon), icon/store/copy scripts, deck and graphics export
 build/                 Release script, macOS bundle files, Windows MSIX manifest and tiles
 art/                   Master icon (rendered by the game) and generated icon files
@@ -87,8 +87,8 @@ Not in git: `oricport/` (the Oric original's source), `releases/`, `stores/`, `a
 ## Quick start
 
 ```bash
-dotnet run --project src/Orictron.Desktop      # play on Mac/Windows
-dotnet test tests/Orictron.Tests                # unit tests
+dotnet run --project src/Quazitronic.Desktop      # play on Mac/Windows
+dotnet test tests/Quazitronic.Tests                # unit tests
 build/build-release.sh all                      # release packages -> releases/
 ```
 

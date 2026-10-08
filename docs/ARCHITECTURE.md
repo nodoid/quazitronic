@@ -1,7 +1,7 @@
 # Architecture
 
 ```
-OrictronGame (MonoGame Game: 224-high adaptive virtual screen, settings, audio, screens)
+QuazitronicGame (MonoGame Game: 224-high adaptive virtual screen, settings, audio, screens)
  ├─ Original/   OricScreen (HIRES-format picture), OriginalRenderer (port of the Oric version's drawing),
  │              OriginalData.g.cs (its font, sprites, deck charsets and cell maps, panel, frame, logo)
  ├─ Game/       Session (the remade game, a port of the original's main.c), Transfer, Autopilot, Droids,

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>uk.co.allthejohnsons.orictron</string>
+	<string>uk.co.allthejohnsons.quazitronic</string>
 	<key>CFBundleName</key>
 	<string>Orictron</string>
 	<key>CFBundleDisplayName</key>

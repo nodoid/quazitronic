@@ -2,7 +2,7 @@
 """Generate every platform icon / splash / tile for Orictron from one master image.
 
 The master, art/source/icon-1024.png, is drawn by the game's own renderer:
-    dotnet run -c Release --project tools/Orictron.Capture -- icon artifacts/capture/icon --script icon
+    dotnet run -c Release --project tools/Quazitronic.Capture -- icon artifacts/capture/icon --script icon
 (then resized to 1024 x 1024). This script cuts it into every size each platform wants.
 
 Usage:  python3 tools/make_icons.py
@@ -42,14 +42,14 @@ def main():
     save(master, GEN, "icon-1024.png")
 
     # iOS asset catalogue (no alpha allowed).
-    ios_dir = os.path.join(ROOT, "src", "Orictron.iOS", "AppIcon.xcassets", "AppIcon.appiconset")
+    ios_dir = os.path.join(ROOT, "src", "Quazitronic.iOS", "AppIcon.xcassets", "AppIcon.appiconset")
     for s in [20, 29, 40, 58, 60, 76, 80, 87, 120, 152, 167, 180, 1024]:
         save(master.resize((s, s), Image.LANCZOS), ios_dir, f"icon_{s}x{s}.png")
     shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ios-appicon-contents.json"),
                 os.path.join(ios_dir, "Contents.json"))
 
     # Android launcher icons and splash.
-    res = os.path.join(ROOT, "src", "Orictron.Android", "Resources")
+    res = os.path.join(ROOT, "src", "Quazitronic.Android", "Resources")
     for name, s in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
         save(master.resize((s, s), Image.LANCZOS), res, f"drawable-{name}", "icon.png")
     splash = backdrop(960, 540)

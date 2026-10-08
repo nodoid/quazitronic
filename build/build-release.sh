@@ -26,8 +26,8 @@ source "$LOCAL"
 APPLE_DIST="$APPLE_DIST_IDENTITY"
 MAC_INSTALLER="$MAC_INSTALLER_IDENTITY"
 ENTITLEMENTS="$WORK/Entitlements.plist"
-MAC_PROFILE_NAME="rel-orictron-mac"
-IOS_PROFILE_NAME="rel-orictron"
+MAC_PROFILE_NAME="rel-quazitronic-mac"
+IOS_PROFILE_NAME="rel-quazitronic"
 NAME="Orictron"
 
 # Always build releases from clean: an incremental Android build once packaged stale assemblies.
@@ -77,24 +77,24 @@ build_android() {
   [ -f "$props" ] || { echo "Missing $props - run build/create-android-keystore.sh"; exit 1; }
   # shellcheck disable=SC1090
   source "$props"
-  dotnet publish src/Orictron.Android -c Release -o "$WORK/android" \
+  dotnet publish src/Quazitronic.Android -c Release -o "$WORK/android" \
     -p:AndroidKeyStore=true \
     -p:AndroidSigningKeyStore="$ROOT/signing/$KEYSTORE_FILE" \
     -p:AndroidSigningKeyAlias="$KEY_ALIAS" \
     -p:AndroidSigningStorePass="env:ORICTRON_STORE_PASS" \
     -p:AndroidSigningKeyPass="env:ORICTRON_STORE_PASS"
-  cp "$WORK/android/uk.co.allthejohnsons.orictron-Signed.aab" "$OUT/$NAME-$VERSION-android.aab"
-  cp "$WORK/android/uk.co.allthejohnsons.orictron-Signed.apk" "$OUT/$NAME-$VERSION-android.apk"
+  cp "$WORK/android/uk.co.allthejohnsons.quazitronic-Signed.aab" "$OUT/$NAME-$VERSION-android.aab"
+  cp "$WORK/android/uk.co.allthejohnsons.quazitronic-Signed.apk" "$OUT/$NAME-$VERSION-android.apk"
 }
 
 build_ios() {
   echo "== iOS"
   if ! find_profile "$IOS_PROFILE_NAME" mobileprovision >/dev/null; then
-    echo "SKIPPED: provisioning profile '$IOS_PROFILE_NAME' (App Store, App ID uk.co.allthejohnsons.orictron) is not installed."
+    echo "SKIPPED: provisioning profile '$IOS_PROFILE_NAME' (App Store, App ID uk.co.allthejohnsons.quazitronic) is not installed."
     echo "         Create it in the Apple Developer portal, double-click it, then re-run: build/build-release.sh ios"
     return 0
   fi
-  dotnet publish src/Orictron.iOS -c Release -o "$WORK/ios" \
+  dotnet publish src/Quazitronic.iOS -c Release -o "$WORK/ios" \
     -p:ArchiveOnBuild=false -p:BuildIpa=true
   cp "$(find "$WORK/ios" -name '*.ipa' | head -1)" "$OUT/$NAME-$VERSION-ios.ipa"
 }
@@ -105,7 +105,7 @@ build_macos() {
   rm -rf "$pub" "$app"
   # Single-file keeps managed .dlls inside the (signed) executable; codesign rejects loose
   # non-Mach-O files in Contents/MacOS. Native dylibs stay beside it and are signed individually.
-  dotnet publish src/Orictron.Desktop -c Release -r osx-arm64 --self-contained true \
+  dotnet publish src/Quazitronic.Desktop -c Release -r osx-arm64 --self-contained true \
     -p:UseAppHost=true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=false -o "$pub"
 
   mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
@@ -151,7 +151,7 @@ build_windows() {
   for arch in x64 arm64; do
     local pub="$WORK/windows-$arch"
     rm -rf "$pub"
-    dotnet publish src/Orictron.Desktop -c Release -r "win-$arch" --self-contained true -o "$pub"
+    dotnet publish src/Quazitronic.Desktop -c Release -r "win-$arch" --self-contained true -o "$pub"
     rm -f "$pub/"*.pdb
     # Package layout: app files + manifest + tiles (unqualified names: no resources.pri needed).
     sed -e "s/__VERSION__/$VERSION/" -e "s/__ARCH__/$arch/" -e "s/__IDENTITY__/$WINDOWS_IDENTITY/" \

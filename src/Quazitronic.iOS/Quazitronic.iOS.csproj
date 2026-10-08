@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-ios</TargetFramework>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
+    <RootNamespace>Quazitronic.iOS</RootNamespace>
+    <AssemblyName>Orictron</AssemblyName>
+    <ApplicationId>uk.co.allthejohnsons.quazitronic</ApplicationId>
+    <ApplicationTitle>Orictron</ApplicationTitle>
+    <ApplicationVersion>$(OrictronBuildNumber)</ApplicationVersion>
+    <ApplicationDisplayVersion>$(OrictronVersion)</ApplicationDisplayVersion>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <CodesignKey>$(OrictronAppleDevIdentity)</CodesignKey>
+    <CodesignProvision>devel-quazitronic</CodesignProvision>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
+    <CodesignKey>$(OrictronAppleDistIdentity)</CodesignKey>
+    <CodesignProvision>rel-quazitronic</CodesignProvision>
+    <ArchiveOnBuild>false</ArchiveOnBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Quazitronic.Core\Quazitronic.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.iOS" Version="$(MonoGameVersion)" />
+  </ItemGroup>
+</Project>

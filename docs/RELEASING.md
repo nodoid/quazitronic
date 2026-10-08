@@ -16,8 +16,8 @@ Output in `releases/`:
 |---|---|---|
 | `Orictron-<v>-android.aab` | Android (upload key) | Google Play Console |
 | `Orictron-<v>-android.apk` | Android (signed) | testers / sideload |
-| `Orictron-<v>-ios.ipa` | iOS/iPadOS (profile `rel-orictron`) | App Store Connect (Transporter) |
-| `Orictron-<v>-macos.pkg` | Mac App Store (profile `rel-orictron-mac`) | App Store Connect (Transporter) |
+| `Orictron-<v>-ios.ipa` | iOS/iPadOS (profile `rel-quazitronic`) | App Store Connect (Transporter) |
+| `Orictron-<v>-macos.pkg` | Mac App Store (profile `rel-quazitronic-mac`) | App Store Connect (Transporter) |
 | `Orictron-<v>-windows-x64.msix`, `-arm64.msix` | Windows 10/11 (unsigned; the Store signs) | Partner Center |
 
 Bump `OrictronBuildNumber` (and `OrictronVersion`) in `Directory.Build.props` for every store upload.
@@ -26,14 +26,18 @@ Bump `OrictronBuildNumber` (and `OrictronVersion`) in `Directory.Build.props` fo
 
 | Platform | Identifier |
 |---|---|
-| iOS, macOS | `uk.co.allthejohnsons.orictron` |
-| Android | `uk.co.allthejohnsons.orictron` |
+| iOS, macOS | `uk.co.allthejohnsons.quazitronic` |
+| Android | `uk.co.allthejohnsons.quazitronic` |
 | Windows | Package identity and publisher from Partner Center > Product identity, set in `signing/local.properties` |
 
 ## Apple profiles
 
-Installed from ~/Downloads: `devel-orictron`, `rel-orictron` (iOS) and `devel-orictron-mac`,
-`rel-orictron-mac` (macOS). The release profiles expire in May 2027. The build looks them up by name.
+The App ID is `uk.co.allthejohnsons.quazitronic`. Create it in the Apple Developer portal (Identifiers,
+explicit App ID, iOS and macOS), then four profiles with these exact names (the build looks them up by name):
+`devel-quazitronic` (iOS App Development), `rel-quazitronic` (App Store Connect, iOS),
+`devel-quazitronic-mac` (macOS App Development) and `rel-quazitronic-mac` (Mac App Store Connect).
+Download and double-click each. Until they are installed, the release script skips iOS and builds an
+ad-hoc signed Mac app for local testing only.
 
 macOS packages must carry no extended attributes (App Store error 91109): the script copies the
 profile with `cp -X`, clears attributes before signing and checks the finished `.pkg`.
