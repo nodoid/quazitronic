@@ -78,7 +78,7 @@ public sealed class OriginalLookTests
         var withPlayer = new OriginalRenderer();
         withPlayer.Draw(s, 1);
         var before = (byte[])withPlayer.Screen.Bytes.Clone();
-        for (int i = 0; i < 40; i++) s.Tick(new Controls { Right = true, Down = true });
+        for (int i = 0; i < 40; i++) s.Tick(new Controls { Right = true });
         withPlayer.Draw(s, 41);
         Assert.NotEqual(before, withPlayer.Screen.Bytes); // the picture follows the game
     }

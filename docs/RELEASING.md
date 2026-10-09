@@ -16,26 +16,27 @@ Output in `releases/`:
 |---|---|---|
 | `Orictron-<v>-android.aab` | Android (upload key) | Google Play Console |
 | `Orictron-<v>-android.apk` | Android (signed) | testers / sideload |
-| `Orictron-<v>-ios.ipa` | iOS/iPadOS (profile `rel-quazitronic`) | App Store Connect (Transporter) |
-| `Orictron-<v>-macos.pkg` | Mac App Store (profile `rel-quazitronic-mac`) | App Store Connect (Transporter) |
+| `Orictron-<v>-ios.ipa` | iOS/iPadOS (profile `rel-orictron`) | App Store Connect (Transporter) |
+| `Orictron-<v>-macos.pkg` | Mac App Store (profile `rel-orictron-mac`) | App Store Connect (Transporter) |
 | `Orictron-<v>-windows-x64.msix`, `-arm64.msix` | Windows 10/11 (unsigned; the Store signs) | Partner Center |
 
 Bump `OrictronBuildNumber` (and `OrictronVersion`) in `Directory.Build.props` for every store upload.
+Windows packages are versioned major.minor.build.0 (1.0.0 build 2 -> 1.0.2.0), as the Store reserves the fourth part.
 
 ## Identifiers
 
 | Platform | Identifier |
 |---|---|
-| iOS, macOS | `uk.co.allthejohnsons.quazitronic` |
+| iOS, macOS | `uk.co.allthejohnsons.orictron` |
 | Android | `uk.co.allthejohnsons.quazitronic` |
 | Windows | Package identity and publisher from Partner Center > Product identity, set in `signing/local.properties` |
 
 ## Apple profiles
 
-The App ID is `uk.co.allthejohnsons.quazitronic`. Create it in the Apple Developer portal (Identifiers,
+The App ID is `uk.co.allthejohnsons.orictron`. Create it in the Apple Developer portal (Identifiers,
 explicit App ID, iOS and macOS), then four profiles with these exact names (the build looks them up by name):
-`devel-quazitronic` (iOS App Development), `rel-quazitronic` (App Store Connect, iOS),
-`devel-quazitronic-mac` (macOS App Development) and `rel-quazitronic-mac` (Mac App Store Connect).
+`devel-orictron` (iOS App Development), `rel-orictron` (App Store Connect, iOS),
+`devel-orictron-mac` (macOS App Development) and `rel-orictron-mac` (Mac App Store Connect).
 Download and double-click each. Until they are installed, the release script skips iOS and builds an
 ad-hoc signed Mac app for local testing only.
 

@@ -200,12 +200,15 @@ public sealed class Session
     private int TileAt(int x, int y) => Deck.TileAt(x, y);
 
     private int _curT;
+    /// <summary>For a player move, the highest floor under the current footprint; -1 for droids,
+    /// which never step off a ledge.</summary>
+    private int _support = -1;
 
     private bool CornerOk(int t)
     {
         int l = t & 3, cl = _curT & 3;
         if (!Deck.Walkable((byte)t)) return false;
-        if (l == cl) return true;
+        if (l == cl || l <= _support) return true;
         if ((l == cl + 1 || l + 1 == cl) && ((t >> 2) == (int)TileKind.Pad || (_curT >> 2) == (int)TileKind.Pad)) return true;
         return false;
     }
@@ -217,6 +220,34 @@ public sealed class Session
         return CornerOk(TileAt(nx - 4, ny - 4)) && CornerOk(TileAt(nx + 3, ny - 4)) &&
                CornerOk(TileAt(nx - 4, ny + 3)) && CornerOk(TileAt(nx + 3, ny + 3));
     }
+
+    /// <summary>
+    /// Can the player move from (x, y) to (nx, ny)? As in the original, the player may walk off any
+    /// ledge onto lower floor (and is hurt by the fall); climbing still needs a step pad. Ground still
+    /// under part of the footprint holds the player up, so a ledge just left doesn't block.
+    /// </summary>
+    internal bool PlayerCanGo(int x, int y, int nx, int ny)
+    {
+        if (Demo) return CanGo(x, y, nx, ny);
+        _support = Math.Max(Math.Max(Support(x - 4, y - 4), Support(x + 3, y - 4)),
+                            Math.Max(Support(x - 4, y + 3), Support(x + 3, y + 3)));
+        bool ok = CanGo(x, y, nx, ny);
+        _support = -1;
+        // The centre never rises without a step pad, so a ledge just dropped from can't be climbed back.
+        int to = TileAt(nx, ny);
+        if (ok && (to & 3) > (_curT & 3)) ok = CornerOk(to);
+        return ok;
+    }
+
+    private int Support(int x, int y)
+    {
+        int t = TileAt(x, y);
+        return Deck.Walkable((byte)t) ? t & 3 : -1;
+    }
+
+    /// <summary>Energy lost falling the given number of levels: a step down stings, a long drop
+    /// can finish off a weak droid.</summary>
+    internal static int FallDamage(int levels) => 3 * levels * levels;
 
     internal static bool CloseTo(int ax, int ay, int bx, int by, int r) =>
         ((ax - bx + r) & 0xFF) < ((r * 2) & 0xFF) && ((ay - by + r) & 0xFF) < ((r * 2) & 0xFF);
@@ -400,13 +431,15 @@ public sealed class Session
             _autopilot.Drive(out _inDx, out _inDy, out _inFire, out _inGrab, out _inLift);
             return;
         }
+        // As on the Spectrum, "played diagonally": each direction runs along one map axis, so up is
+        // up-right on screen, right is down-right, down is down-left and left is up-left.
         int dx = 0, dy = 0;
-        if (_in.Up) { dx--; dy--; }
-        if (_in.Down) { dx++; dy++; }
-        if (_in.Left) { dx--; dy++; }
-        if (_in.Right) { dx++; dy--; }
-        _inDx = Math.Clamp(dx, -1, 1);
-        _inDy = Math.Clamp(dy, -1, 1);
+        if (_in.Up) dy--;
+        if (_in.Down) dy++;
+        if (_in.Left) dx--;
+        if (_in.Right) dx++;
+        _inDx = dx;
+        _inDy = dy;
         _inFire = _in.Fire;
         _inGrab = _in.Grapple;
         _inLift = _in.Lift;
@@ -419,23 +452,30 @@ public sealed class Session
     {
         int dx = _inDx, dy = _inDy;
         if (dx != 0 || dy != 0) { FacingX = dx; FacingY = dy; }
+        int level = TileAt(PlayerX, PlayerY) & 3;
         int sp = Droids.Speed[PlayerType];
         for (int k = 0; k < sp; k++)
         {
             int nx = (PlayerX + dx) & 0xFF;
-            if (dx != 0 && CanGo(PlayerX, PlayerY, nx, PlayerY))
+            if (dx != 0 && PlayerCanGo(PlayerX, PlayerY, nx, PlayerY))
             {
                 int a = Touching(nx, PlayerY, 11);
                 if (a < 0) PlayerX = nx;
                 else Ram(a);
             }
             int ny = (PlayerY + dy) & 0xFF;
-            if (dy != 0 && CanGo(PlayerX, PlayerY, PlayerX, ny))
+            if (dy != 0 && PlayerCanGo(PlayerX, PlayerY, PlayerX, ny))
             {
                 int a = Touching(PlayerX, ny, 11);
                 if (a < 0) PlayerY = ny;
                 else Ram(a);
             }
+        }
+        int fell = level - (TileAt(PlayerX, PlayerY) & 3);
+        if (fell > 0)
+        {
+            Cue_(Cue.Ram, 0, PlayerX, PlayerY);
+            HurtPlayer(FallDamage(fell));
         }
         if (_pRam != 0) _pRam--;
     }

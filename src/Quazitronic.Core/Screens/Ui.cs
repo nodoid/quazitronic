@@ -199,14 +199,16 @@ public static class TouchUi
         }
     }
 
-    /// <summary>The on-screen D-pad (when tilt is off): four arrows around a centre.</summary>
+    /// <summary>The on-screen D-pad (when tilt is off): four arrows around a centre, turned 45 degrees
+    /// because the droid moves diagonally, as on the Spectrum.</summary>
     public static void AddDpad(InputState input, Vector2 centre, float size)
     {
-        float s = size / 3;
-        input.TouchButtons.Add(new TouchButton(Pad.Up, new RectangleF(centre.X - s / 2, centre.Y - s * 1.5f, s, s), "↑"));
-        input.TouchButtons.Add(new TouchButton(Pad.Down, new RectangleF(centre.X - s / 2, centre.Y + s / 2, s, s), "↓"));
-        input.TouchButtons.Add(new TouchButton(Pad.Left, new RectangleF(centre.X - s * 1.5f, centre.Y - s / 2, s, s), "←"));
-        input.TouchButtons.Add(new TouchButton(Pad.Right, new RectangleF(centre.X + s / 2, centre.Y - s / 2, s, s), "→"));
+        float s = size / 3, o = s * 0.75f;
+        RectangleF At(float dx, float dy) => new(centre.X + dx - s / 2, centre.Y + dy - s / 2, s, s);
+        input.TouchButtons.Add(new TouchButton(Pad.Up, At(o, -o), "↗"));
+        input.TouchButtons.Add(new TouchButton(Pad.Right, At(o, o), "↘"));
+        input.TouchButtons.Add(new TouchButton(Pad.Down, At(-o, o), "↙"));
+        input.TouchButtons.Add(new TouchButton(Pad.Left, At(-o, -o), "↖"));
     }
 }
 
@@ -223,7 +225,7 @@ public sealed class PauseMenu
             Change: _ => { game.SetEnhanced(!game.Enhanced); graphicsChanged?.Invoke(); }));
         _menu.Add(new MenuList.Item(() => "SOUND: " + (game.Save.Sound ? "ON" : "OFF"), Change: _ => game.SetSound(!game.Save.Sound)));
         _menu.Add(new MenuList.Item(() => "CONTROLS: " + (game.Save.TiltControls ? "TILT" : "D-PAD"),
-            Change: _ => { game.SetTiltControls(!game.Save.TiltControls); game.Tilt.Reset(); }, Visible: () => game.HasTiltOption));
+            Change: _ => game.SetTiltControls(!game.Save.TiltControls), Visible: () => game.HasTiltOption));
         _menu.Add(new MenuList.Item(() => "QUIT TO TITLE", () => { Open = false; quit(); }));
     }
 

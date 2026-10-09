@@ -27,7 +27,7 @@ public sealed class InstructionsScreen : Screen
         }),
         new("CONTROLS", g => g.IsMobile ? new[]
         {
-            g.UseTilt ? "TILT the device to move: tip the top edge away to go up the screen, towards you to go down, left or right to go across. However you hold it when play starts counts as level."
+            g.UseTilt ? "TILT the device to move: tip the top edge away to go up the screen, towards you to go down, left or right to go across. Hold it flat, face up, to stand still."
                       : "Use the D-PAD to move (tilt can be turned on in the menu).",
             "",
             "FIRE shoots in the direction you last moved.",
@@ -38,7 +38,7 @@ public sealed class InstructionsScreen : Screen
             "In a transfer battle, tilt up and down to choose a wire and press FIRE - or just tap a wire.",
         } : new[]
         {
-            "ARROWS or Q A O P    move (screen directions)",
+            "ARROWS or Q A O P    move diagonally",
             "SPACE                fire",
             "T or RETURN          grapple a droid you touch",
             "Hold SPACE still     grapple, then run into one",

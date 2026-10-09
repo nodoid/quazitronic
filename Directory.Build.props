@@ -5,7 +5,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <!-- Single source of truth for the release version on every platform. -->
     <OrictronVersion>1.0.0</OrictronVersion>
-    <OrictronBuildNumber>1</OrictronBuildNumber>
+    <OrictronBuildNumber>2</OrictronBuildNumber>
     <Version>$(OrictronVersion)</Version>
     <Company>Paul F. Johnson</Company>
     <Product>Orictron</Product>

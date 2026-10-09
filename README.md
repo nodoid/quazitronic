@@ -64,7 +64,7 @@ Your five best scores are saved on the device and kept between sessions. See
 
 | | |
 |---|---|
-| Identifiers | Apple and Android `uk.co.allthejohnsons.quazitronic` |
+| Identifiers | Apple `uk.co.allthejohnsons.orictron`, Android `uk.co.allthejohnsons.quazitronic` |
 | Version | 1.0.0 (build 1), set in `Directory.Build.props` |
 
 ## Repository layout

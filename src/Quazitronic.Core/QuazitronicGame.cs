@@ -184,7 +184,12 @@ public sealed class QuazitronicGame : Microsoft.Xna.Framework.Game
         dt = MathF.Min(dt, 0.1f);
         Clock += dt;
         if (Director == null) Input.Update(ScreenToVirtual);
-        if (TiltActive && UseTilt && TiltSensor!.TryRead(out var g)) Input.SetTilt(Tilt.Update(g));
+        Input.TiltDiagonal = (_screen as PlayScreen)?.OnDeck == true;
+        if (TiltActive && UseTilt && TiltSensor!.TryRead(out var g))
+        {
+            Tilt.Orientation = Window.CurrentOrientation;
+            Input.SetTilt(Tilt.Update(g));
+        }
         else if (Director == null || !TiltActive) Input.SetTilt(null);
 
         if (!IsMobile && Input.ToggleFullScreen) ToggleFullScreen();
@@ -290,6 +295,7 @@ public sealed class QuazitronicGame : Microsoft.Xna.Framework.Game
 
     protected override void OnActivated(object sender, EventArgs args)
     {
+        if (TiltActive) TiltSensor?.Start(); // stopped in OnDeactivated
         _screen?.OnActivated();
         base.OnActivated(sender, args);
     }

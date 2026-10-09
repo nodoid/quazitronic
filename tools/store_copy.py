@@ -182,7 +182,7 @@ def apple(platform):
         ]
     d.lines("FILES TO UPLOAD", files)
     d.table("ANSWERS IN THE CONSOLE", [
-        ("Bundle ID", "uk.co.allthejohnsons.quazitronic"),
+        ("Bundle ID", "uk.co.allthejohnsons.orictron"),
         ("SKU", "orictron"),
         ("Primary language", "English (U.K.)"),
         ("Category", "Games > Arcade (secondary: Games > Action)"),

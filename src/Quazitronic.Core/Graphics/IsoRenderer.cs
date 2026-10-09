@@ -195,6 +195,30 @@ public sealed class IsoRenderer
                 b.Quad(new(x0, y0, top), new(x1, y0, top), new(x1, y1, top), new(x0, y1, top),
                     Corner(0, 0), Corner(1, 0), Corner(1, 1), Corner(0, 1), TextureFactory.Uv(cell));
 
+                // --- a lit rim wherever raised floor drops to lower floor. The far edges have no visible
+                // step face, so without it a walkway in front of the player reads as floor at their level.
+                if (kind != TileKind.Wall)
+                {
+                    const float W = 2f;
+                    float z = top + 0.15f;
+                    var rim = Color.Lerp(accent, Color.White, 0.5f);
+                    var white = TextureFactory.Uv(AtlasCell.White);
+                    for (int e = 0; e < 4; e++)
+                    {
+                        int ni = i + (e == 0 ? -1 : e == 1 ? 1 : 0), nj = j + (e == 2 ? -1 : e == 3 ? 1 : 0);
+                        float nTop = TopOf(deck, ni, nj);
+                        if (float.IsNegativeInfinity(nTop) || nTop >= top - 0.1f) continue;
+                        var (r0, r1) = e switch
+                        {
+                            0 => (new Vector3(x0, y0, z), new Vector3(x0 + W, y1, z)),
+                            1 => (new Vector3(x1 - W, y0, z), new Vector3(x1, y1, z)),
+                            2 => (new Vector3(x0, y0, z), new Vector3(x1, y0 + W, z)),
+                            _ => (new Vector3(x0, y1 - W, z), new Vector3(x1, y1, z)),
+                        };
+                        glow.Quad(r0, new(r1.X, r0.Y, z), r1, new(r0.X, r1.Y, z), rim, white);
+                    }
+                }
+
                 // --- the two visible side faces (+x shows lower right, +y lower left)
                 for (int side = 0; side < 2; side++)
                 {

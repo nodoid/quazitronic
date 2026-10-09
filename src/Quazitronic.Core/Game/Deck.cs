@@ -82,7 +82,19 @@ internal static partial class DeckData
     {
         var d = new Deck[Raw.Length];
         for (int i = 0; i < d.Length; i++) d[i] = new Deck(i, Raw[i]);
+        // As generated, deck 1's lift opens onto a floor-level corridor hidden behind a walkway two
+        // levels up with no ramp onto it: from the camera the corridor floor can't be seen, and the
+        // way out that the screen shows isn't there. Its walkway is brought down to floor level.
+        d[0] = new Deck(0, Raw[0] with { Tiles = Lowered(Raw[0].Tiles, from: 2, to: 0) });
         return d;
+    }
+
+    private static byte[] Lowered(byte[] tiles, int from, int to)
+    {
+        var t = (byte[])tiles.Clone();
+        for (int k = 0; k < t.Length; k++)
+            if ((t[k] & 3) == from) t[k] = (byte)((t[k] & ~3) | to);
+        return t;
     }
 
     public static Deck Get(int index) => (_decks ??= BuildAll())[index];

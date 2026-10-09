@@ -18,51 +18,39 @@ public interface ITiltSensor
 }
 
 /// <summary>
-/// Turns device tilt into a virtual analogue stick. "Level" is however the player is holding the
-/// device when <see cref="Calibrate"/> is called (start of play, and on resuming). Tipping the top
-/// edge away gives +Y (forward / up), tipping the right side down gives +X (right).
+/// Turns device tilt into a virtual analogue stick. Level is the device lying flat, face up, like a
+/// marble-rolling game. Tipping the top edge down (away from the player) gives +Y (up the screen),
+/// tipping the right side down gives +X (right).
 /// </summary>
 public sealed class TiltController
 {
     /// <summary>Tilt (radians, about 20 degrees) for full deflection.</summary>
     public const float FullAngle = 0.35f;
     /// <summary>Small tilts are ignored so a slightly unsteady hand doesn't drift.</summary>
-    public const float DeadZone = 0.12f;
+    public const float DeadZone = 0.2f;
 
     private Vector3 _screenUp = Vector3.UnitX;
     private Vector3 _screenRight = -Vector3.UnitY;
-    private float _neutralPitch, _neutralRoll;
-    private bool _calibrated;
 
-    public bool IsCalibrated => _calibrated;
     public Vector2 Stick { get; private set; }
 
-    public void Reset() => _calibrated = false;
-
-    public void Calibrate(Vector3 g)
+    /// <summary>Which way up the screen is. Landscape left (device top to the left) puts the device's
+    /// +X edge at the top of the screen; landscape right is the other way round.</summary>
+    public DisplayOrientation Orientation
     {
-        // Held tilted towards the player, gravity runs down the screen, so the screen's "up" is the
-        // device axis gravity mostly lies along, reversed. That copes with either landscape
-        // orientation and with tablets whose natural orientation is landscape.
-        if (MathF.Abs(g.X) >= 0.15f || MathF.Abs(g.Y) >= 0.15f)
+        set
         {
-            _screenUp = MathF.Abs(g.X) >= MathF.Abs(g.Y)
-                ? new Vector3(-MathF.Sign(g.X), 0, 0)
-                : new Vector3(0, -MathF.Sign(g.Y), 0);
+            _screenUp = value == DisplayOrientation.LandscapeRight ? -Vector3.UnitX : Vector3.UnitX;
             // right x up = out of the screen (+Z), so right = up x Z.
             _screenRight = Vector3.Cross(_screenUp, Vector3.UnitZ);
         }
-        _neutralPitch = Pitch(g);
-        _neutralRoll = Roll(g);
-        _calibrated = true;
-        Stick = Vector2.Zero;
     }
 
+    /// <param name="g">Gravity in the device frame.</param>
     public Vector2 Update(Vector3 g)
     {
-        if (!_calibrated) Calibrate(g);
-        float y = Shape((_neutralPitch - Pitch(g)) / FullAngle);
-        float x = Shape((Roll(g) - _neutralRoll) / FullAngle);
+        float y = Shape(-Pitch(g) / FullAngle);
+        float x = Shape(Roll(g) / FullAngle);
         Stick = new Vector2(x, y);
         return Stick;
     }
@@ -74,7 +62,7 @@ public sealed class TiltController
         return MathF.Sign(v) * MathF.Min(1, (a - DeadZone) / (1 - DeadZone));
     }
 
-    /// <summary>Angle of the screen from flat (0 = face up, pi/2 = upright facing the player).</summary>
+    /// <summary>Tip of the screen from flat: 0 face up, positive with the top edge raised (towards the player).</summary>
     private float Pitch(Vector3 g) => MathF.Atan2(-Vector3.Dot(g, _screenUp), -g.Z);
 
     /// <summary>Sideways tip: positive when the right-hand side of the screen dips.</summary>

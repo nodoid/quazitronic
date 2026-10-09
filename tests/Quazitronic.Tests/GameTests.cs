@@ -85,6 +85,28 @@ public sealed class GameTests
     }
 
     [Fact]
+    public void ThePlayerDropsOffALedgeAndIsHurtButCannotClimbBack()
+    {
+        var s = new Session(5);
+        Run(s, 2);
+        Banish(s);
+        // Deck 0: tile (4, 7) is level 1, tile (5, 7) next to it is floor level.
+        Assert.Equal(0, s.DeckIndex);
+        Assert.Equal((1, 0), (s.Deck.Level(4, 7), s.Deck.Level(5, 7)));
+        s.PlayerX = 4 * Deck.TileUnits + 6;
+        s.PlayerY = 7 * Deck.TileUnits + 6;
+        int hp = s.PlayerHp;
+        var east = new Controls { Right = true }; // world +x
+        for (int i = 0; i < 60 && s.Deck.FloorZ(s.PlayerX, s.PlayerY) != 0; i++) s.Tick(east);
+        Assert.Equal(0, s.Deck.FloorZ(s.PlayerX, s.PlayerY));
+        Assert.Equal(hp - Session.FallDamage(1), s.PlayerHp);
+
+        // Back west is a climb with no step pad: the player stays on the lower floor.
+        Run(s, 60, new Controls { Left = true });
+        Assert.Equal(0, s.Deck.FloorZ(s.PlayerX, s.PlayerY));
+    }
+
+    [Fact]
     public void WallsBlockMovement()
     {
         var s = new Session(5);
@@ -143,12 +165,12 @@ public sealed class GameTests
         var s = new Session(21);
         Banish(s, 0);
         int px = s.PlayerX, py = s.PlayerY;
-        // a droid just to the +x side, then push into it (DOWN+RIGHT is world +x)
+        // a droid just to the +x side, then push into it (RIGHT is world +x)
         s.DroidX[0] = px + 12; s.DroidY[0] = py;
         if (!s.CanGo(px, py, px + 12, py)) { s.DroidX[0] = px - 12; }
         bool plusX = s.DroidX[0] > px;
         int hp = s.PlayerHp, dhp = s.DroidHp(0);
-        var c = plusX ? new Controls { Down = true, Right = true } : new Controls { Up = true, Left = true };
+        var c = plusX ? new Controls { Right = true } : new Controls { Left = true };
         for (int i = 0; i < 30; i++)
         {
             s.DroidX[0] = plusX ? s.PlayerX + 12 : s.PlayerX - 12; s.DroidY[0] = s.PlayerY;

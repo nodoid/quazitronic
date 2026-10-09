@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using CoreMotion;
+using Foundation;
 using Quazitronic.Input;
 
 namespace Quazitronic.iOS;
@@ -8,6 +9,7 @@ namespace Quazitronic.iOS;
 internal sealed class IosTiltSensor : ITiltSensor
 {
     private readonly CMMotionManager _motion = new();
+    private double _startedAt;
 
     public bool IsAvailable => _motion.DeviceMotionAvailable;
 
@@ -15,6 +17,8 @@ internal sealed class IosTiltSensor : ITiltSensor
     {
         if (!IsAvailable || _motion.DeviceMotionActive) return;
         _motion.DeviceMotionUpdateInterval = 1.0 / 60.0;
+        // DeviceMotion keeps its last sample after a stop; anything older than this is stale.
+        _startedAt = NSProcessInfo.ProcessInfo.SystemUptime;
         _motion.StartDeviceMotionUpdates();
     }
 
@@ -25,7 +29,8 @@ internal sealed class IosTiltSensor : ITiltSensor
 
     public bool TryRead(out Vector3 gravity)
     {
-        var g = _motion.DeviceMotion?.Gravity;
+        var motion = _motion.DeviceMotionActive ? _motion.DeviceMotion : null;
+        var g = motion?.Timestamp >= _startedAt ? motion.Gravity : (CMAcceleration?)null;
         if (g == null)
         {
             gravity = default;

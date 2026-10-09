@@ -5,7 +5,7 @@
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <RootNamespace>Quazitronic.iOS</RootNamespace>
     <AssemblyName>Orictron</AssemblyName>
-    <ApplicationId>uk.co.allthejohnsons.quazitronic</ApplicationId>
+    <ApplicationId>uk.co.allthejohnsons.orictron</ApplicationId>
     <ApplicationTitle>Orictron</ApplicationTitle>
     <ApplicationVersion>$(OrictronBuildNumber)</ApplicationVersion>
     <ApplicationDisplayVersion>$(OrictronVersion)</ApplicationDisplayVersion>
@@ -13,12 +13,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <CodesignKey>$(OrictronAppleDevIdentity)</CodesignKey>
-    <CodesignProvision>devel-quazitronic</CodesignProvision>
+    <CodesignProvision>devel-orictron</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <RuntimeIdentifier>ios-arm64</RuntimeIdentifier>
     <CodesignKey>$(OrictronAppleDistIdentity)</CodesignKey>
-    <CodesignProvision>rel-quazitronic</CodesignProvision>
+    <CodesignProvision>rel-orictron</CodesignProvision>
     <ArchiveOnBuild>false</ArchiveOnBuild>
   </PropertyGroup>
   <ItemGroup>

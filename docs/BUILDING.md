@@ -15,4 +15,4 @@ python3 tools/export_decks.py                                           # re-exp
 The master icon is rendered by the game itself:
 `dotnet run -c Release --project tools/Quazitronic.Capture -- icon artifacts/capture/icon --script icon`.
 
-iOS device builds use `Apple Development` + profile `devel-quazitronic`.
+iOS device builds use `Apple Development` + profile `devel-orictron`.

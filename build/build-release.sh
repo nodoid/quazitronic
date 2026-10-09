@@ -26,8 +26,8 @@ source "$LOCAL"
 APPLE_DIST="$APPLE_DIST_IDENTITY"
 MAC_INSTALLER="$MAC_INSTALLER_IDENTITY"
 ENTITLEMENTS="$WORK/Entitlements.plist"
-MAC_PROFILE_NAME="rel-quazitronic-mac"
-IOS_PROFILE_NAME="rel-quazitronic"
+MAC_PROFILE_NAME="rel-orictron-mac"
+IOS_PROFILE_NAME="rel-orictron"
 NAME="Orictron"
 
 # Always build releases from clean: an incremental Android build once packaged stale assemblies.
@@ -90,7 +90,7 @@ build_android() {
 build_ios() {
   echo "== iOS"
   if ! find_profile "$IOS_PROFILE_NAME" mobileprovision >/dev/null; then
-    echo "SKIPPED: provisioning profile '$IOS_PROFILE_NAME' (App Store, App ID uk.co.allthejohnsons.quazitronic) is not installed."
+    echo "SKIPPED: provisioning profile '$IOS_PROFILE_NAME' (App Store, App ID uk.co.allthejohnsons.orictron) is not installed."
     echo "         Create it in the Apple Developer portal, double-click it, then re-run: build/build-release.sh ios"
     return 0
   fi
@@ -148,13 +148,16 @@ build_windows() {
   local makemsix="$ROOT/tools/msix/makemsix"
   [ -x "$makemsix" ] || build/windows/build-makemsix.sh
   rm -f "$OUT/$NAME-$VERSION-windows-"*
+  # The Store reserves the fourth part (always 0) and wants every upload higher than the last, so the
+  # build number takes the third: 1.0.0 build 2 -> 1.0.2.0.
+  local WIN_VERSION="${VERSION%.*}.$BUILD"
   for arch in x64 arm64; do
     local pub="$WORK/windows-$arch"
     rm -rf "$pub"
     dotnet publish src/Quazitronic.Desktop -c Release -r "win-$arch" --self-contained true -o "$pub"
     rm -f "$pub/"*.pdb
     # Package layout: app files + manifest + tiles (unqualified names: no resources.pri needed).
-    sed -e "s/__VERSION__/$VERSION/" -e "s/__ARCH__/$arch/" -e "s/__IDENTITY__/$WINDOWS_IDENTITY/" \
+    sed -e "s/__VERSION__/$WIN_VERSION/" -e "s/__ARCH__/$arch/" -e "s/__IDENTITY__/$WINDOWS_IDENTITY/" \
       -e "s/__PUBLISHER__/$WINDOWS_PUBLISHER/" -e "s/__PUBLISHER_NAME__/$WINDOWS_PUBLISHER_NAME/" build/windows/AppxManifest.xml > "$pub/AppxManifest.xml"
     mkdir -p "$pub/Assets"
     for f in build/windows/Assets/*.scale-200.png; do

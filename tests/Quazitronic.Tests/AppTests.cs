@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Quazitronic.Audio;
 using Quazitronic.Input;
@@ -9,36 +10,45 @@ namespace Quazitronic.Tests;
 
 public sealed class TiltTests
 {
-    [Theory]
-    [InlineData(1f)]
-    [InlineData(-1f)]
-    public void LevelIsWhereverYouHoldIt(float side)
+    /// <summary>Gravity for a device in the given landscape orientation, its top edge raised by
+    /// <paramref name="towards"/> degrees and its right side lowered by <paramref name="right"/> degrees.</summary>
+    private static Vector3 Held(DisplayOrientation o, float towards, float right = 0)
     {
-        var t = new TiltController();
-        var held = new Vector3(0.7f * side, 0, -0.7f);
-        t.Calibrate(held);
-        Assert.Equal(Vector2.Zero, t.Update(held));
-        Assert.Equal(Vector2.Zero, t.Update(held + new Vector3(0.02f * side, 0.02f, 0)));
+        float p = MathHelper.ToRadians(towards), r = MathHelper.ToRadians(right);
+        // Screen frame: (right, up, out); landscape left has screen up along device +X.
+        var screen = new Vector3(MathF.Sin(r), -MathF.Sin(p) * MathF.Cos(r), -MathF.Cos(p) * MathF.Cos(r));
+        float s = o == DisplayOrientation.LandscapeRight ? -1 : 1;
+        return new Vector3(s * screen.Y, -s * screen.X, screen.Z);
     }
 
     [Theory]
-    [InlineData(1f)]
-    [InlineData(-1f)]
-    public void TippingAwayIsUpTheScreen(float side)
+    [InlineData(DisplayOrientation.LandscapeLeft)]
+    [InlineData(DisplayOrientation.LandscapeRight)]
+    public void FlatIsLevel(DisplayOrientation o)
     {
-        var t = new TiltController();
-        t.Calibrate(new Vector3(0.7f * side, 0, -0.7f));
-        Assert.True(t.Update(Vector3.Normalize(new Vector3(0.45f * side, 0, -0.9f))).Y > 0.5f);
-        Assert.True(t.Update(Vector3.Normalize(new Vector3(0.9f * side, 0, -0.45f))).Y < -0.5f);
+        var t = new TiltController { Orientation = o };
+        Assert.Equal(Vector2.Zero, t.Update(Held(o, 0)));
+        Assert.Equal(Vector2.Zero, t.Update(Held(o, 3, -3)));
     }
 
-    [Fact]
-    public void DippingTheRightSideSteersRight()
+    [Theory]
+    [InlineData(DisplayOrientation.LandscapeLeft)]
+    [InlineData(DisplayOrientation.LandscapeRight)]
+    public void TippingTheTopDownIsUpTheScreen(DisplayOrientation o)
     {
-        var t = new TiltController();
-        t.Calibrate(new Vector3(0.7f, 0, -0.7f));
-        Assert.True(t.Update(Vector3.Normalize(new Vector3(0.7f, 0.3f, -0.65f))).X > 0.5f);
-        Assert.True(t.Update(Vector3.Normalize(new Vector3(0.7f, -0.3f, -0.65f))).X < -0.5f);
+        var t = new TiltController { Orientation = o };
+        Assert.Equal(new Vector2(0, 1), t.Update(Held(o, -25)));
+        Assert.Equal(new Vector2(0, -1), t.Update(Held(o, 25)));
+    }
+
+    [Theory]
+    [InlineData(DisplayOrientation.LandscapeLeft)]
+    [InlineData(DisplayOrientation.LandscapeRight)]
+    public void DippingTheRightSideSteersRight(DisplayOrientation o)
+    {
+        var t = new TiltController { Orientation = o };
+        Assert.Equal(new Vector2(1, 0), t.Update(Held(o, 0, 25)));
+        Assert.Equal(new Vector2(-1, 0), t.Update(Held(o, 0, -25)));
     }
 
     [Fact]
@@ -55,6 +65,19 @@ public sealed class TiltTests
         Assert.False(input.Held(Pad.Up));
         input.SetTilt(new Vector2(-0.1f, 0));
         Assert.False(input.Held(Pad.Left));
+    }
+
+    [Fact]
+    public void OnTheDeckTiltTurnsWithTheDiagonalControls()
+    {
+        // Tipping towards screen up-right is UP (map -y); towards screen left is LEFT + DOWN (map -x, +y).
+        var input = new InputState { TiltDiagonal = true };
+        input.SetTilt(Vector2.Normalize(new Vector2(1, 1)));
+        Assert.True(input.Held(Pad.Up));
+        Assert.False(input.Held(Pad.Right) || input.Held(Pad.Left) || input.Held(Pad.Down));
+        input.SetTilt(new Vector2(-1, 0));
+        Assert.True(input.Held(Pad.Left) && input.Held(Pad.Down));
+        Assert.False(input.Held(Pad.Up) || input.Held(Pad.Right));
     }
 }
 

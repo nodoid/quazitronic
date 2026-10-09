@@ -38,7 +38,7 @@ public sealed class PlayScreen : Screen
         _autoplay = autoplay;
         _session = new Session(seed, demo: autoplay);
         _view = new DeckView(_session) { OnTick = OnTick };
-        _pause = new PauseMenu(game, Resume, Quit, StyleChanged);
+        _pause = new PauseMenu(game, () => { }, Quit, StyleChanged);
         _wasEnhanced = game.Enhanced;
     }
 
@@ -79,7 +79,6 @@ public sealed class PlayScreen : Screen
     {
         UpdateMusic();
         Game.TiltActive = true;
-        Game.Tilt.Reset();
         Game.TiltSensor?.Start();
         if (!_autoplay)
         {
@@ -117,11 +116,6 @@ public sealed class PlayScreen : Screen
         });
     }
 
-    private void Resume()
-    {
-        Game.Tilt.Reset(); // whatever angle the device is at now counts as level
-    }
-
     private void Quit()
     {
         RecordScore();
@@ -143,6 +137,9 @@ public sealed class PlayScreen : Screen
             : -1;
         Game.PersistSave();
     }
+
+    /// <summary>Walking the deck (rather than in a transfer battle or on a text screen).</summary>
+    internal bool OnDeck => _session.View == Quazitronic.Game.View.Deck;
 
     private Controls ReadControls()
     {

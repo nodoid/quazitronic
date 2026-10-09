@@ -47,6 +47,11 @@ public sealed class InputState
     /// <summary>The device-tilt stick while tilt steering is active (null otherwise).</summary>
     public Vector2? Tilt { get; private set; }
 
+    /// <summary>On the deck the directions run diagonally on screen (see Session), so tilt is turned
+    /// 45 degrees to match: the droid still goes the way the device is tipped. Elsewhere (the transfer
+    /// battle) tilt is screen up/down/left/right.</summary>
+    public bool TiltDiagonal { get; set; }
+
     /// <summary>Feeds this frame's tilt stick (or null when tilt isn't in use). Directions count as
     /// held past 0.5 deflection and released below 0.3, so a wobble doesn't re-trigger.</summary>
     public void SetTilt(Vector2? tilt)
@@ -59,6 +64,8 @@ public sealed class InputState
             return;
         }
         static bool Hyst(bool was, float v) => was ? v > 0.3f : v > 0.5f;
+        // Up is screen up-right, right is down-right.
+        if (TiltDiagonal) t = new Vector2(t.X - t.Y, t.X + t.Y) * MathF.Sqrt(0.5f);
         _tiltHeld[(int)Pad.Right] = Hyst(_tiltHeld[(int)Pad.Right], t.X);
         _tiltHeld[(int)Pad.Left] = Hyst(_tiltHeld[(int)Pad.Left], -t.X);
         _tiltHeld[(int)Pad.Up] = Hyst(_tiltHeld[(int)Pad.Up], t.Y);
